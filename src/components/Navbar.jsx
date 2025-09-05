@@ -1,15 +1,46 @@
+import { useNavigate, NavLink } from "react-router-dom";
+import { useMemo } from "react";
+import { ShieldCheck, LogOut } from "lucide-react";
+
 export default function Navbar() {
+    const navigate = useNavigate();
+    const isLogged = useMemo(() => !!sessionStorage.getItem("nursia_access_key"), []);
+
+    function handleLogout() {
+        sessionStorage.removeItem("nursia_access_key");
+        navigate("/login");
+    }
+
+    const linkBase =
+        "rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/70 transition";
+    const linkActive = "text-gray-900 bg-white/70";
+
     return (
-        <header className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-gray-900/70 backdrop-blur-md">
-            <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-                <div className="text-lg font-semibold tracking-tight">
-                    <span className="text-white">Nursia</span>
+        <header className="fixed inset-x-0 top-0 z-40 border-b border-gray-200/70 bg-white/60 backdrop-blur-xl">
+            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+                {/* Brand */}
+                <div className="flex items-center gap-2">
+                    <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600"/>
+                    <span className="text-lg font-semibold text-gray-900">Nursia</span>
                 </div>
-                <nav className="flex items-center gap-4 text-sm text-gray-300">
-                    <a href="/" className="hover:text-white transition">Início</a>
-                    <a href="/dashboard" className="hover:text-white transition">Dashboard</a>
-                    <a href="/records" className="hover:text-white transition">Registros</a>
-                </nav>
+
+                {/* Right actions */}
+                <div className="flex items-center gap-2">
+                <span className="hidden items-center gap-1 rounded-xl border border-gray-200 bg-white/60 px-2.5 py-1.5 text-xs font-medium text-gray-700 sm:inline-flex">
+                    <ShieldCheck size={14} className="text-emerald-600"/>
+                    Acesso de Enfermagem
+                </span>
+                    {isLogged && (
+                        <button
+                            onClick={handleLogout}
+                            className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/70 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-white"
+                            title="Sair"
+                        >
+                            <LogOut size={16}/>
+                            Sair
+                        </button>
+                    )}
+                </div>
             </div>
         </header>
     );

@@ -1,31 +1,24 @@
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import RecordForm from "./pages/RecordForm";
 
-// telas placeholder
-function Dashboard() {
-    return <div className="pt-24 mx-auto max-w-6xl p-4">Bem-vindo à Nursia 👋</div>;
-}
-
-function RecordsList() {
-    return <div className="pt-24 mx-auto max-w-6xl p-4">Lista de registros</div>;
+function ProtectedRoute({ children }) {
+    const key = sessionStorage.getItem("nursia_access_key");
+    if (!key) return <Navigate to="/login" replace />;
+    return children;
 }
 
 function Layout({ children }) {
     const location = useLocation();
     const hideNavbar = location.pathname === "/login";
     return (
-        <div className="min-h-screen bg-gray-950 text-gray-100">
-            {!hideNavbar && <Navbar/>}
-            {children}
+        <div className="min-h-screen bg-white text-gray-900">
+            {!hideNavbar && <Navbar />}
+            <main className={!hideNavbar ? "pt-20" : ""}>{children}</main>
         </div>
     );
-}
-
-function ProtectedRoute({ children }) {
-    const key = sessionStorage.getItem("nursia_access_key");
-    if (!key) return <Navigate to="/login" replace/>;
-    return children;
 }
 
 export default function App() {
@@ -33,12 +26,15 @@ export default function App() {
         <BrowserRouter>
             <Layout>
                 <Routes>
-                    <Route path="/login" element={<Login/>}/>
+                    {/* Público */}
+                    <Route path="/login" element={<Login />} />
+
+                    {/* Protegidas */}
                     <Route
                         path="/"
                         element={
                             <ProtectedRoute>
-                                <Dashboard/>
+                                <Navigate to="/dashboard" replace />
                             </ProtectedRoute>
                         }
                     />
@@ -46,19 +42,29 @@ export default function App() {
                         path="/dashboard"
                         element={
                             <ProtectedRoute>
-                                <Dashboard/>
+                                <Dashboard />
                             </ProtectedRoute>
                         }
                     />
                     <Route
-                        path="/records"
+                        path="/records/new"
                         element={
                             <ProtectedRoute>
-                                <RecordsList/>
+                                <RecordForm mode="create" />
                             </ProtectedRoute>
                         }
                     />
-                    <Route path="*" element={<Navigate to="/" replace/>}/>
+                    <Route
+                        path="/records/:id/edit"
+                        element={
+                            <ProtectedRoute>
+                                <RecordForm mode="edit" />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* Fallback */}
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
             </Layout>
         </BrowserRouter>

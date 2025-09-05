@@ -31,3 +31,9 @@ export async function verifyAccessKey(key) {
         return { ok: false, error: msg };
     }
 }
+
+export async function listRecords(params = {}) {
+    const { q } = params;
+    const res = await api.get("/records", { params: { q } });
+    return res.data; // array
+}
