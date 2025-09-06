@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getRecord, deleteRecord } from "../services/api";
+import ConfirmDialog from "../components/ConfirmDialog";
 import {
     ArrowLeft,
     HeartPulse,
@@ -19,6 +20,10 @@ export default function RecordView() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState("");
+    const title = useMemo(() => data?.nome || "Prontuário", [data?.nome]);
+    const isAdmin = !!sessionStorage.getItem("nursia_admin_key");
+    const [openDel, setOpenDel] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         let on = true;
@@ -38,20 +43,23 @@ export default function RecordView() {
         };
     }, [id]);
 
-    const title = useMemo(() => data?.nome || "Prontuário", [data?.nome]);
-    const isAdmin = !!sessionStorage.getItem("nursia_admin_key");
-
     async function handleDelete() {
         if (!isAdmin) return;
-        const ok = window.confirm("Tem certeza que deseja excluir este prontuário?");
-        if (!ok) return;
+        setOpenDel(true);
+    }
+
+    async function confirmDelete() {
         try {
+            setDeleting(true);
             await deleteRecord(id);
-            alert("Prontuário excluído com sucesso.");
+            setOpenDel(false);
             navigate(-1);
         } catch (e) {
             const msg = e?.response?.data?.error || "Não foi possível excluir.";
+            // opcional: você pode abrir outro ConfirmDialog variant="info" para exibir msg
             alert(msg);
+        } finally {
+            setDeleting(false);
         }
     }
 
@@ -100,7 +108,7 @@ export default function RecordView() {
                                         <Pencil size={16}/> Editar
                                     </button>
                                     <button
-                                        onClick={handleDelete}
+                                        onClick={() => setOpenDel(true)}
                                         className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
                                         title="Excluir prontuário"
                                     >
@@ -386,6 +394,20 @@ export default function RecordView() {
                     )}
                 </div>
             </div>
+
+            {isAdmin && (
+                <ConfirmDialog
+                    open={openDel}
+                    onClose={() => (!deleting && setOpenDel(false))}
+                    onConfirm={confirmDelete}
+                    loading={deleting}
+                    title="Excluir prontuário"
+                    message="Esta ação é irreversível. Você realmente deseja excluir este prontuário?"
+                    confirmText="Excluir"
+                    cancelText="Cancelar"
+                    variant="danger"
+                />
+            )}
         </div>
     );
 }

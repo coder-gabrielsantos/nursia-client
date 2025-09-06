@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createDraft, deleteDraft } from "../hooks/useRecordDraft";
 import { createRecord } from "../services/api";
+import SelectRS from "react-select";
+import InfoDialog from "../components/InfoDialog.jsx";
 import useRecordDraft from "../hooks/useRecordDraft";
 import {
     ArrowLeft,
     ArrowRight,
-    Save,
     CheckCircle2,
     Check,
 } from "lucide-react";
-import SelectRS from "react-select";
 
 export default function RecordForm({ mode = "create" }) {
     const { draftId } = useParams();
@@ -39,6 +39,7 @@ function FormSteps({ draftId }) {
 
     const [submitting, setSubmitting] = useState(false);
     const [submitErr, setSubmitErr] = useState("");
+    const [openSuccess, setOpenSuccess] = useState(false);
 
     if (!draft) {
         return (
@@ -91,8 +92,7 @@ function FormSteps({ draftId }) {
             deleteDraft(draft.id);
 
             // feedback simples e redireciona
-            alert("Prontuário criado com sucesso!");
-            navigate("/dashboard");
+            setOpenSuccess(true);
         } catch (e) {
             const msg =
                 e?.response?.data?.error ||
@@ -118,9 +118,6 @@ function FormSteps({ draftId }) {
                                     <h1 className="truncate text-base sm:text-lg font-semibold text-gray-900">
                                         Novo prontuário
                                     </h1>
-                                    <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-700">
-                                        Rascunho
-                                    </span>
                                 </div>
                                 <span className="block truncate text-[11px] text-gray-500">
                                     ID • {draft.id}
@@ -236,6 +233,17 @@ function FormSteps({ draftId }) {
                     </button>
                 )}
             </div>
+            <InfoDialog
+                open={openSuccess}
+                onClose={() => {
+                    setOpenSuccess(false);
+                    navigate("/dashboard");
+                }}
+                title="Prontuário criado"
+                message="O prontuário foi criado com sucesso."
+                okText="Ir para o painel"
+                variant="success"
+            />
         </div>
     );
 }
