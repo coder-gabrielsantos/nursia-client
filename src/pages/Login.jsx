@@ -7,20 +7,36 @@ import {
 
 export default function Login() {
     const navigate = useNavigate();
+
     const [key, setKey] = useState("");
     const [show, setShow] = useState(false);
+
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [adminKey, setAdminKey] = useState("");
+    const [showAdmin, setShowAdmin] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
 
     useEffect(() => {
+        // Se já logado, redireciona
         const existing = sessionStorage.getItem("nursia_access_key");
         if (existing) navigate("/dashboard");
+
+        // Se já tem admin key salva, pré-marca o "É admin?"
+        const existingAdmin = sessionStorage.getItem("nursia_admin_key");
+        if (existingAdmin) {
+            setIsAdmin(true);
+            setAdminKey(existingAdmin);
+        }
     }, [navigate]);
 
     async function handleSubmit(e) {
         e.preventDefault();
         setErr("");
         setLoading(true);
+
+        // Valida somente a access key (rota protegida por checkAccess)
         const { ok, error } = await verifyAccessKey(key.trim());
         setLoading(false);
 
@@ -28,7 +44,17 @@ export default function Login() {
             setErr(error || "Chave inválida");
             return;
         }
+
+        // Salva access key
         sessionStorage.setItem("nursia_access_key", key.trim());
+
+        // Salva/limpa admin key conforme toggle
+        if (isAdmin && adminKey.trim()) {
+            sessionStorage.setItem("nursia_admin_key", adminKey.trim());
+        } else {
+            sessionStorage.removeItem("nursia_admin_key");
+        }
+
         navigate("/dashboard");
     }
 
@@ -40,7 +66,7 @@ export default function Login() {
                 <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-pink-100/40 blur-3xl"/>
             </div>
 
-            {/* Conteúdo centralizado com padding generoso */}
+            {/* Conteúdo centralizado */}
             <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl items-center justify-center px-6 md:px-12 lg:px-20 py-12">
                 <div className="grid w-full gap-12 md:grid-cols-2 md:items-center">
                     {/* ESQUERDA — oculta em telas pequenas */}
@@ -60,7 +86,7 @@ export default function Login() {
                             Uma plataforma feita para apoiar a prática de enfermagem no CAPS — informações essenciais e foco no cuidado ao paciente.
                         </p>
 
-                        {/* Features modernas (com ícones Lucide) */}
+                        {/* Features com ícones Lucide */}
                         <div className="mt-6 grid grid-cols-2 gap-6">
                             <Feature
                                 icon={<ClipboardList size={18}/>}
@@ -100,6 +126,7 @@ export default function Login() {
                             </header>
 
                             <form className="space-y-5" onSubmit={handleSubmit}>
+                                {/* Chave de acesso */}
                                 <label className="block">
                                     <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
                                         Chave de acesso
@@ -124,6 +151,54 @@ export default function Login() {
                                     </div>
                                 </label>
 
+                                {/* Toggle É admin? */}
+                                <label className="flex items-center gap-2 text-sm text-gray-800 select-none">
+                                    <input
+                                        type="checkbox"
+                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-200"
+                                        checked={isAdmin}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setIsAdmin(checked);
+                                            if (!checked) {
+                                                // desliga: limpa admin key salva
+                                                setAdminKey("");
+                                                sessionStorage.removeItem("nursia_admin_key");
+                                            }
+                                        }}
+                                    />
+                                    É admin?
+                                </label>
+
+                                {/* Campo Admin key (condicional) */}
+                                {isAdmin && (
+                                    <label className="block">
+                                        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
+                                            Admin key
+                                        </span>
+                                        <div className="relative">
+                                            <input
+                                                type={showAdmin ? "text" : "password"}
+                                                value={adminKey}
+                                                onChange={(e) => setAdminKey(e.target.value)}
+                                                className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 pr-10 text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                                placeholder="••••••••"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAdmin((s) => !s)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                                aria-label={showAdmin ? "Ocultar admin key" : "Mostrar admin key"}
+                                            >
+                                                {showAdmin ? <EyeOff size={20}/> : <Eye size={20}/>}
+                                            </button>
+                                        </div>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Opcional. Necessária apenas para ações administrativas.
+                                        </p>
+                                    </label>
+                                )}
+
                                 {err && (
                                     <div className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
                                         {err}
@@ -146,7 +221,7 @@ export default function Login() {
                                 <span className="h-px flex-1 bg-gray-200"/>
                             </div>
 
-                            {/* Checklist com mensagens relevantes (ícone Lucide) */}
+                            {/* Checklist informativo */}
                             <ul className="space-y-2 text-sm text-gray-600">
                                 <li className="flex items-start gap-2">
                                     <CheckCircle2 size={16} className="mt-0.5 text-green-600"/>
@@ -173,7 +248,7 @@ export default function Login() {
     );
 }
 
-/* --- Component auxiliar --- */
+/* --- Componente auxiliar --- */
 function Feature({ icon, title, desc, color }) {
     return (
         <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md hover:border-gray-300">
