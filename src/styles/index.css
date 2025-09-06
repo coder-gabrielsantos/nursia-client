@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+/* Chrome, Safari, Edge */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
+/* Firefox */
+input[type="date"] {
+    -moz-appearance: textfield;
+}

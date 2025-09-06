@@ -11,8 +11,7 @@ export default function Navbar() {
         navigate("/login");
     }
 
-    const linkBase =
-        "rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/70 transition";
+    const linkBase   = "rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/70 transition";
     const linkActive = "text-gray-900 bg-white/70";
 
     return (

@@ -55,6 +55,14 @@ export default function App() {
                         }
                     />
                     <Route
+                        path="/records/new/:draftId"
+                        element={
+                            <ProtectedRoute>
+                                <RecordForm mode="create" />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/records/:id/edit"
                         element={
                             <ProtectedRoute>
@@ -62,7 +70,6 @@ export default function App() {
                             </ProtectedRoute>
                         }
                     />
-
                     {/* Fallback */}
                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>

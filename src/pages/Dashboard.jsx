@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { listDrafts, deleteDraft } from "../hooks/useRecordDraft";
 import { listRecords } from "../services/api";
 import {
-    Plus, RefreshCw, Search, TrendingUp, HeartPulse, Activity, Filter, ArrowUpDown,
+    Plus, RefreshCw, Search, TrendingUp, HeartPulse, Activity, Filter, ArrowUpDown, FileEdit, Trash2, Play
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -163,6 +164,8 @@ export default function Dashboard() {
                 </div>
             </div>
 
+            <Rascunhos/>
+
             {/* Lista */}
             {loading ? (
                 <SkeletonGrid/>
@@ -249,6 +252,47 @@ function SkeletonGrid() {
                     </div>
                 </div>
             ))}
+        </div>
+    );
+}
+
+function Rascunhos() {
+    const [drafts, setDrafts] = useState([]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        setDrafts(listDrafts());
+    }, []);
+
+    if (drafts.length === 0) return null;
+
+    return (
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">Rascunhos em andamento</h3>
+                <button onClick={() => setDrafts(listDrafts())} className="text-xs text-gray-600 hover:underline">Atualizar</button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {drafts.map((d) => (
+                    <div key={d.id} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
+                        <div>
+                            <div className="text-sm font-medium text-gray-900">Rascunho #{d.id}</div>
+                            <div className="text-xs text-gray-500">Passo {d.step} de 5 • Atualizado {new Date(d.updatedAt).toLocaleString()}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => navigate(`/records/new/${d.id}`)} className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
+                                <Play size={14}/> Continuar
+                            </button>
+                            <button onClick={() => {
+                                deleteDraft(d.id);
+                                setDrafts(listDrafts());
+                            }} className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                                <Trash2 size={14}/> Excluir
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
