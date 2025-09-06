@@ -13,6 +13,7 @@ import {
     ChevronLeft,
     ChevronRight,
     CalendarDays,
+    ArrowRight
 } from "lucide-react";
 import SelectRS from "react-select";
 
@@ -283,7 +284,16 @@ function Kpi({ icon, title, value, hint }) {
 
 function RecordCard({ record }) {
     const navigate = useNavigate();
-    const { _id, nome, dataAtendimento, idade, sexo } = record || {};
+    const {
+        _id,
+        nome,
+        dataAtendimento,
+        idade,
+        sexo,
+        paSistolica,
+        paDiastolica,
+        glicemiaCapilar,
+    } = record || {};
 
     return (
         <button
@@ -312,21 +322,40 @@ function RecordCard({ record }) {
             </div>
 
             {/* Informações adicionais */}
-            <div className="mb-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
-                <div>
-                    <span className="block font-medium text-gray-800">Idade</span>
-                    <span>{idade ? `${idade} anos` : "—"}</span>
+            <div className="mb-3 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-xl border border-gray-100 bg-white px-3 py-2">
+                    <div className="mb-0.5 text-[11px] uppercase tracking-wide text-gray-500">Idade</div>
+                    <div className="font-medium text-gray-900">{idade ? `${idade} anos` : "—"}</div>
                 </div>
-                <div>
-                    <span className="block font-medium text-gray-800">Sexo</span>
-                    <span>{sexo || "—"}</span>
+                <div className="rounded-xl border border-gray-100 bg-white px-3 py-2">
+                    <div className="mb-0.5 text-[11px] uppercase tracking-wide text-gray-500">Sexo</div>
+                    <div className="font-medium text-gray-900">{sexo || "—"}</div>
+                </div>
+                <div className="rounded-xl border border-gray-100 bg-white px-3 py-2 col-span-2 flex justify-between">
+                    <div>
+                        <div className="mb-0.5 text-[11px] uppercase tracking-wide text-gray-500">PA</div>
+                        <div className="font-medium text-gray-900">
+                            {paSistolica && paDiastolica ? `${paSistolica}/${paDiastolica} mmHg` : "—"}
+                        </div>
+                    </div>
+                    <div>
+                        <div className="mb-0.5 text-[11px] uppercase tracking-wide text-gray-500">Glicemia</div>
+                        <div className="font-medium text-gray-900">
+                            {glicemiaCapilar ? `${glicemiaCapilar} mg/dL` : "—"}
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* Rodapé */}
-            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"/>
-                Clique para abrir
+            <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                <div className="inline-flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"/>
+                    Clique para abrir
+                </div>
+                <span className="inline-flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    Ver detalhes <ArrowRight size={14} className="shrink-0"/>
+                </span>
             </div>
         </button>
     );
