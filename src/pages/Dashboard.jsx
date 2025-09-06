@@ -110,19 +110,19 @@ export default function Dashboard() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={fetchData}
-                        className="inline-flex h-10 items-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50"
+                        className="inline-flex cursor-pointer h-10 items-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50"
                         title="Atualizar"
                     >
-                        <RefreshCw size={16} /> Atualizar
+                        <RefreshCw size={16}/> Atualizar
                     </button>
 
                     {/* Só admins veem o botão de novo prontuário */}
                     {isAdmin && (
                         <button
                             onClick={() => navigate("/records/new")}
-                            className="inline-flex h-10 items-center gap-2 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
+                            className="inline-flex cursor-pointer h-10 items-center gap-2 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
                         >
-                            <Plus size={16} /> Novo prontuário
+                            <Plus size={16}/> Novo prontuário
                         </button>
                     )}
                 </div>
@@ -131,19 +131,19 @@ export default function Dashboard() {
             {/* KPIs */}
             <div className="mb-6 grid gap-4 sm:grid-cols-3">
                 <Kpi
-                    icon={<TrendingUp size={18} className="text-blue-600" />}
+                    icon={<TrendingUp size={18} className="text-blue-600"/>}
                     title="Prontuários"
                     value={kpis.total}
                     hint="Total carregado"
                 />
                 <Kpi
-                    icon={<Activity size={18} className="text-rose-600" />}
+                    icon={<Activity size={18} className="text-rose-600"/>}
                     title="PA ≥ 140 mmHg"
                     value={kpis.paElevada}
                     hint="Sistólica elevada"
                 />
                 <Kpi
-                    icon={<HeartPulse size={18} className="text-emerald-600" />}
+                    icon={<HeartPulse size={18} className="text-emerald-600"/>}
                     title="Glicemia ≥ 180 mg/dL"
                     value={kpis.glicemiaAlterada}
                     hint="Valores alterados"
@@ -192,13 +192,13 @@ export default function Dashboard() {
                     <div className="flex w-full gap-2 md:w-auto mt-6 md:mt-[18px]">
                         <button
                             onClick={fetchData}
-                            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-3 text-sm font-medium text-gray-800 hover:bg-gray-50 md:flex-none"
+                            className="inline-flex cursor-pointer h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-3 text-sm font-medium text-gray-800 hover:bg-gray-50 md:flex-none"
                         >
-                            <Filter size={16} /> Aplicar
+                            <Filter size={16}/> Aplicar
                         </button>
                         <button
                             onClick={() => setQ("")}
-                            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm font-medium text-gray-700 hover:bg-gray-100 md:flex-none"
+                            className="inline-flex cursor-pointer h-11 flex-1 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm font-medium text-gray-700 hover:bg-gray-100 md:flex-none"
                         >
                             Limpar
                         </button>
@@ -207,14 +207,14 @@ export default function Dashboard() {
             </div>
 
             {/* Rascunhos: só admins conseguem criar/retomar formulários */}
-            {isAdmin && <Rascunhos />}
+            {isAdmin && <Rascunhos/>}
 
             {/* Separador entre Rascunhos e Prontuários */}
-            <div className="my-8 border-t border-gray-200" />
+            <div className="my-8 border-t border-gray-200"/>
 
             {/* Lista de Prontuários com título + paginação */}
             {loading ? (
-                <SkeletonGrid />
+                <SkeletonGrid/>
             ) : err ? (
                 <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">{err}</div>
             ) : items.length === 0 ? (
@@ -239,7 +239,7 @@ export default function Dashboard() {
                                 className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50"
                                 aria-label="Página anterior"
                             >
-                                <ChevronLeft size={18} />
+                                <ChevronLeft size={18}/>
                             </button>
                             <span className="px-2 text-xs text-gray-600 tabular-nums">
                                 {recPage}/{recTotalPages}
@@ -250,14 +250,14 @@ export default function Dashboard() {
                                 className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50"
                                 aria-label="Próxima página"
                             >
-                                <ChevronRight size={18} />
+                                <ChevronRight size={18}/>
                             </button>
                         </nav>
                     </header>
 
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {visibleRecords.map((r) => (
-                            <RecordCard key={r._id} record={r} />
+                            <RecordCard key={r._id} record={r}/>
                         ))}
                     </div>
                 </section>
@@ -283,7 +283,7 @@ function Kpi({ icon, title, value, hint }) {
 
 function RecordCard({ record }) {
     const navigate = useNavigate();
-    const { _id, nome, dataAtendimento } = record || {};
+    const { _id, nome, dataAtendimento, idade, sexo } = record || {};
 
     return (
         <button
@@ -291,36 +291,41 @@ function RecordCard({ record }) {
             onClick={() => navigate(`/records/${_id}`)}
             aria-label={`Abrir prontuário de ${nome || "paciente"}`}
             className="
-            group w-full overflow-hidden rounded-2xl
-            border border-gray-200 bg-white p-5 text-left shadow-sm
-            transition-all duration-200 hover:shadow-md hover:border-gray-300
-            focus:outline-none focus:ring-2 focus:ring-blue-200
+                cursor-pointer group w-full overflow-hidden rounded-2xl
+                border border-gray-200 bg-white p-5 text-left shadow-sm
+                transition-all duration-200 hover:shadow-md hover:border-gray-300
+                focus:outline-none focus:ring-2 focus:ring-blue-200
             "
         >
             {/* Cabeçalho: Nome + Data */}
-            <div className="mb-2 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                    <h3
-                        className="truncate text-[15px] font-semibold text-gray-900 transition-colors group-hover:text-gray-800"
-                        title={nome || "Paciente"}
-                    >
-                        {nome || "Paciente"}
-                    </h3>
-
-                    <div className="mt-1 inline-flex items-center gap-1.5 text-xs text-gray-500">
-                        <CalendarDays size={14} className="shrink-0" />
-                        <span className="truncate">{dataAtendimento || "—"}</span>
-                    </div>
+            <div className="mb-3 flex items-center justify-between">
+                <h3
+                    className="truncate text-base font-semibold text-gray-900 transition-colors group-hover:text-gray-800"
+                    title={nome || "Paciente"}
+                >
+                    {nome || "Paciente"}
+                </h3>
+                <div className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                    <CalendarDays size={14} className="shrink-0"/>
+                    <span className="truncate">{dataAtendimento || "—"}</span>
                 </div>
-
-                <span className="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] font-medium text-gray-700">
-                    Prontuário
-                </span>
             </div>
 
-            {/* Rodapé: CTA discreta */}
-            <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            {/* Informações adicionais */}
+            <div className="mb-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
+                <div>
+                    <span className="block font-medium text-gray-800">Idade</span>
+                    <span>{idade ? `${idade} anos` : "—"}</span>
+                </div>
+                <div>
+                    <span className="block font-medium text-gray-800">Sexo</span>
+                    <span>{sexo || "—"}</span>
+                </div>
+            </div>
+
+            {/* Rodapé */}
+            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"/>
                 Clique para abrir
             </div>
         </button>
@@ -332,13 +337,13 @@ function SkeletonGrid() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="animate-pulse rounded-2xl border border-gray-200 bg-white p-5">
-                    <div className="mb-4 h-4 w-1/3 rounded bg-gray-200" />
-                    <div className="mb-6 h-5 w-2/3 rounded bg-gray-200" />
+                    <div className="mb-4 h-4 w-1/3 rounded bg-gray-200"/>
+                    <div className="mb-6 h-5 w-2/3 rounded bg-gray-200"/>
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="h-12 rounded-xl bg-gray-100" />
-                        <div className="h-12 rounded-xl bg-gray-100" />
-                        <div className="h-12 rounded-xl bg-gray-100" />
-                        <div className="h-12 rounded-xl bg-gray-100" />
+                        <div className="h-12 rounded-xl bg-gray-100"/>
+                        <div className="h-12 rounded-xl bg-gray-100"/>
+                        <div className="h-12 rounded-xl bg-gray-100"/>
+                        <div className="h-12 rounded-xl bg-gray-100"/>
                     </div>
                 </div>
             ))}
@@ -444,17 +449,6 @@ function Rascunhos() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => {
-                            setDrafts(listDrafts());
-                            go(1);
-                        }}
-                        className="h-9 rounded-xl border border-gray-300 bg-white px-3 text-xs font-medium text-gray-800 hover:bg-gray-50"
-                        title="Recarregar rascunhos"
-                    >
-                        Atualizar
-                    </button>
-
                     {/* Controles de paginação */}
                     <nav className="inline-flex items-center gap-1">
                         <button
@@ -463,7 +457,7 @@ function Rascunhos() {
                             className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50"
                             aria-label="Página anterior"
                         >
-                            <ChevronLeft size={18} />
+                            <ChevronLeft size={18}/>
                         </button>
                         <span className="px-2 text-xs text-gray-600 tabular-nums">
                             {page}/{totalPages}
@@ -474,7 +468,7 @@ function Rascunhos() {
                             className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50"
                             aria-label="Próxima página"
                         >
-                            <ChevronRight size={18} />
+                            <ChevronRight size={18}/>
                         </button>
                     </nav>
                 </div>
@@ -511,7 +505,7 @@ function Rascunhos() {
                                     {d.step < 5 ? "Em edição" : "Para finalizar"}
                                 </span>
                                 <div className="flex-1 h-2 rounded-full bg-gray-200 overflow-hidden">
-                                    <div className="h-full bg-blue-600" style={{ width: `${pct}%` }} />
+                                    <div className="h-full bg-blue-600" style={{ width: `${pct}%` }}/>
                                 </div>
                                 <span className="text-[11px] text-gray-600 tabular-nums">{pct}%</span>
                             </div>
@@ -519,7 +513,7 @@ function Rascunhos() {
                             <div className="mt-3 flex items-center justify-end gap-2">
                                 <button
                                     onClick={() => navigate(`/records/new/${d.id}`)}
-                                    className="h-8 rounded-lg bg-blue-600 px-3 text-xs font-medium text-white hover:bg-blue-700"
+                                    className="cursor-pointer h-8 rounded-lg bg-blue-600 px-3 text-xs font-medium text-white hover:bg-blue-700"
                                 >
                                     Continuar
                                 </button>
@@ -531,7 +525,7 @@ function Rascunhos() {
                                         const newTotal = Math.max(1, Math.ceil(data.length / pageSize));
                                         if (page > newTotal) setPage(newTotal);
                                     }}
-                                    className="h-8 rounded-lg border border-gray-300 bg-white px-3 text-xs font-medium text-gray-800 hover:bg-gray-50"
+                                    className="cursor-pointer h-8 rounded-lg border border-gray-300 bg-white px-3 text-xs font-medium text-gray-800 hover:bg-gray-50"
                                 >
                                     Excluir
                                 </button>

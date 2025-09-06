@@ -110,17 +110,9 @@ function FormSteps({ draftId }) {
             <div className="sticky top-[64px] z-30">
                 <div className="bg-white border border-gray-200 shadow-sm sm:rounded-b-2xl">
                     {/* Linha única e compacta */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-6 md:px-8">
                         {/* Esquerda */}
                         <div className="min-w-0 flex items-center gap-2 sm:gap-3">
-                            <button
-                                onClick={() => navigate(-1)}
-                                className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
-                                aria-label="Voltar"
-                            >
-                                <ArrowLeft size={14}/>
-                            </button>
-
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2 min-w-0">
                                     <h1 className="truncate text-base sm:text-lg font-semibold text-gray-900">
@@ -147,15 +139,6 @@ function FormSteps({ draftId }) {
                             <span className="hidden sm:block text-[11px] text-gray-500">
                                 Etapa {step} de 5
                             </span>
-
-                            <button
-                                onClick={() => alert("Rascunho salvo localmente.")}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
-                                aria-label="Salvar rascunho"
-                            >
-                                <Save size={14}/>
-                                <span className="hidden sm:inline">Salvar</span>
-                            </button>
                         </div>
                     </div>
 
@@ -295,14 +278,13 @@ function Stepper({ current }) {
     const steps = ["Anamnese", "Psicossociais", "Psicobiológicas", "Moradia", "Medidas"];
     const scrollerRef = useRef(null);
 
-    // Em <sm, inicia à esquerda; em ≥sm, centraliza o ativo
     useEffect(() => {
         const el = scrollerRef.current;
         if (!el) return;
         const isSmall = window.matchMedia("(max-width: 639px)").matches;
         const active = el.querySelector('[data-active="true"]');
         if (isSmall) {
-            el.scrollLeft = 0; // garante acesso à esquerda
+            el.scrollLeft = 0;
         } else if (active) {
             active.scrollIntoView({ inline: "center", block: "nearest" });
         }
@@ -315,17 +297,20 @@ function Stepper({ current }) {
             style={{ WebkitOverflowScrolling: "touch" }}
         >
             <ol
-                className="inline-flex min-w-max items-center justify-start sm:justify-center px-2 py-1.5 gap-2 sm:gap-3"
+                className="flex w-full items-center justify-center px-2 py-2 gap-4"
                 aria-label="Progresso das etapas"
             >
                 {steps.map((label, i) => {
                     const n = i + 1;
                     const active = n === current;
                     const done = n < current;
+
                     const baseCircle =
-                        "flex h-7 w-7 items-center justify-center rounded-full border text-[13px] shrink-0";
+                        "flex h-8 w-8 items-center justify-center rounded-full border text-[13px] shrink-0";
+
                     return (
-                        <li key={label} className="flex items-center">
+                        <li key={label} className="flex items-center justify-center gap-2">
+                            {/* Círculo */}
                             <div
                                 data-active={active ? "true" : "false"}
                                 className={[
@@ -341,9 +326,10 @@ function Stepper({ current }) {
                                 {done ? <Check size={14}/> : n}
                             </div>
 
+                            {/* Label */}
                             <span
                                 className={[
-                                    "ml-2 mr-3 sm:mr-4 whitespace-nowrap text-sm",
+                                    "whitespace-nowrap text-sm font-medium",
                                     done
                                         ? "text-emerald-700"
                                         : active
@@ -354,10 +340,11 @@ function Stepper({ current }) {
                                 {label}
                             </span>
 
+                            {/* Linha */}
                             {n < steps.length && (
                                 <div
                                     className={[
-                                        "mr-3 sm:mr-4 h-[2px] w-8 sm:w-12",
+                                        "h-[2px] w-10 sm:w-16",
                                         done ? "bg-emerald-300" : "bg-gray-200",
                                     ].join(" ")}
                                 />

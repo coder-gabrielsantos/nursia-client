@@ -73,13 +73,6 @@ export default function RecordView() {
                                 </span>
                             </p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Badge
-                                icon={<CalendarDays size={14}/>}
-                                text={dash(data?.dataAtendimento)}
-                            />
-                            <Badge icon={<FileText size={14}/>} text="Prontuário"/>
-                        </div>
                     </div>
                 </div>
 
