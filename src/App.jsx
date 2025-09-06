@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer"; // 👈 novo import
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import RecordForm from "./pages/RecordForm";
@@ -23,11 +24,13 @@ function ProtectedRoute({ children }) {
 
 function Layout({ children }) {
     const location = useLocation();
-    const hideNavbar = location.pathname === "/login";
+    const hideLayout = location.pathname === "/login";
+
     return (
-        <div className="min-h-screen bg-white text-gray-900">
-            {!hideNavbar && <Navbar/>}
-            <main className={!hideNavbar ? "pt-20" : ""}>{children}</main>
+        <div className="min-h-screen bg-white text-gray-900 flex flex-col">
+            {!hideLayout && <Navbar/>}
+            <main className={!hideLayout ? "pt-20 flex-1" : "flex-1"}>{children}</main>
+            {!hideLayout && <Footer/>}
         </div>
     );
 }
@@ -35,7 +38,7 @@ function Layout({ children }) {
 export default function App() {
     return (
         <BrowserRouter>
-            <ScrollToTop/> {/* sempre força o scroll para o topo */}
+            <ScrollToTop/>
             <Layout>
                 <Routes>
                     {/* Público */}
