@@ -37,3 +37,8 @@ export async function listRecords(params = {}) {
     const res = await api.get("/records", { params: { q } });
     return res.data; // array
 }
+
+export async function createRecord(payload) {
+    const res = await api.post("/records", payload);
+    return res.data; // objeto criado
+}

@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createDraft } from "../hooks/useRecordDraft";
+import { createDraft, deleteDraft } from "../hooks/useRecordDraft";
 import useRecordDraft from "../hooks/useRecordDraft";
+import { createRecord } from "../services/api";
 import {
     ArrowLeft,
     ArrowRight,
@@ -23,13 +24,16 @@ export default function RecordForm({ mode = "create" }) {
     }, [draftId, mode, navigate]);
 
     if (!draftId) return null;
-    return <FormSteps draftId={draftId}/>;
+    return <FormSteps draftId={draftId} />;
 }
 
 function FormSteps({ draftId }) {
     const { draft, setDraft, updateData, progress } = useRecordDraft(draftId);
     const navigate = useNavigate();
     const step = draft?.step || 1;
+
+    const [submitting, setSubmitting] = useState(false);
+    const [submitErr, setSubmitErr] = useState("");
 
     if (!draft) {
         return (
@@ -49,10 +53,50 @@ function FormSteps({ draftId }) {
         setDraft({ step: Math.max(1, step - 1) });
     }
 
+    // Helper para converter "YYYY-MM-DD" -> "DD/MM/YYYY" (mantém se já estiver no formato BR)
+    function toDateBR(v) {
+        if (!v) return v;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+            const [y, m, d] = v.split("-");
+            return `${d}/${m}/${y}`;
+        }
+        return v;
+    }
+
     async function finish() {
-        setDraft({ step: 5 });
-        alert("Rascunho salvo. Envio ao servidor será implementado após conectar o backend de admin.");
-        navigate("/dashboard");
+        setSubmitErr("");
+        setSubmitting(true);
+        try {
+            // garante step final
+            setDraft({ step: 5 });
+
+            // monta o payload a partir do rascunho
+            const data = draft?.data || {};
+            const payload = {
+                ...data,
+                // normaliza data para o que o Dashboard espera (DD/MM/AAAA)
+                // (o Dashboard faz parse por "/" e ordena por dataBR)
+                dataAtendimento: toDateBR(data?.dataAtendimento),
+            };
+
+            // envia para o backend
+            await createRecord(payload);
+
+            // limpa o rascunho local
+            deleteDraft(draft.id);
+
+            // feedback simples e redireciona
+            alert("Prontuário criado com sucesso!");
+            navigate("/dashboard");
+        } catch (e) {
+            const msg =
+                e?.response?.data?.error ||
+                e?.message ||
+                "Falha ao salvar o prontuário";
+            setSubmitErr(msg);
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
@@ -69,7 +113,7 @@ function FormSteps({ draftId }) {
                                 className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
                                 aria-label="Voltar"
                             >
-                                <ArrowLeft size={14}/>
+                                <ArrowLeft size={14} />
                             </button>
 
                             <div className="min-w-0">
@@ -90,57 +134,83 @@ function FormSteps({ draftId }) {
                         {/* Direita */}
                         <div className="flex items-center gap-3 sm:gap-4">
                             <div className="hidden sm:flex items-center gap-2">
-                                <Progress value={progress} small/>
-                                <span className="text-[11px] text-gray-600">{Math.round(progress)}%</span>
+                                <Progress value={progress} small />
+                                <span className="text-[11px] text-gray-600">
+                                    {Math.round(progress)}%
+                                </span>
                             </div>
-                            <span className="hidden sm:block text-[11px] text-gray-500">Etapa {step} de 5</span>
+                            <span className="hidden sm:block text-[11px] text-gray-500">
+                                Etapa {step} de 5
+                            </span>
 
                             <button
                                 onClick={() => alert("Rascunho salvo localmente.")}
                                 className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
                                 aria-label="Salvar rascunho"
                             >
-                                <Save size={14}/>
+                                <Save size={14} />
                                 <span className="hidden sm:inline">Salvar</span>
                             </button>
                         </div>
                     </div>
 
                     <div className="border-t border-gray-200 px-1.5 sm:px-4 md:px-8 py-1.5">
-                        <Stepper current={step}/>
+                        <Stepper current={step} />
                     </div>
                 </div>
             </div>
 
             {/* Espaço após sticky */}
-            <div className="h-3"/>
+            <div className="h-3" />
+
+            {/* Aviso de erro no envio */}
+            {submitErr && (
+                <div className="mb-3 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {submitErr}
+                </div>
+            )}
 
             {/* Conteúdo do passo */}
             <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
                 <div className="p-5 sm:p-7 md:p-8">
                     {step === 1 && (
-                        <FormSection title="Anamnese" description="Dados iniciais para identificação e histórico clínico atual.">
-                            <Step1_Anamnese data={draft.data} onChange={updateData}/>
+                        <FormSection
+                            title="Anamnese"
+                            description="Dados iniciais para identificação e histórico clínico atual."
+                        >
+                            <Step1_Anamnese data={draft.data} onChange={updateData} />
                         </FormSection>
                     )}
                     {step === 2 && (
-                        <FormSection title="Necessidades Psicossociais" description="Hábitos e fatores sociais relevantes ao cuidado.">
-                            <Step2_PsicoSociais data={draft.data} onChange={updateData}/>
+                        <FormSection
+                            title="Necessidades Psicossociais"
+                            description="Hábitos e fatores sociais relevantes ao cuidado."
+                        >
+                            <Step2_PsicoSociais data={draft.data} onChange={updateData} />
                         </FormSection>
                     )}
                     {step === 3 && (
-                        <FormSection title="Necessidades Psicobiológicas" description="Rotinas de cuidado, sono, nutrição e atividades.">
-                            <Step3_PsicoBiologicas data={draft.data} onChange={updateData}/>
+                        <FormSection
+                            title="Necessidades Psicobiológicas"
+                            description="Rotinas de cuidado, sono, nutrição e atividades."
+                        >
+                            <Step3_PsicoBiologicas data={draft.data} onChange={updateData} />
                         </FormSection>
                     )}
                     {step === 4 && (
-                        <FormSection title="Condições de Moradia" description="Infraestrutura, saneamento e composição familiar.">
-                            <Step4_Moradia data={draft.data} onChange={updateData}/>
+                        <FormSection
+                            title="Condições de Moradia"
+                            description="Infraestrutura, saneamento e composição familiar."
+                        >
+                            <Step4_Moradia data={draft.data} onChange={updateData} />
                         </FormSection>
                     )}
                     {step === 5 && (
-                        <FormSection title="Medidas e Sinais" description="Registre medidas vitais e observações finais.">
-                            <Step5_Medidas data={draft.data} onChange={updateData}/>
+                        <FormSection
+                            title="Medidas e Sinais"
+                            description="Registre medidas vitais e observações finais."
+                        >
+                            <Step5_Medidas data={draft.data} onChange={updateData} />
                         </FormSection>
                     )}
                 </div>
@@ -150,25 +220,27 @@ function FormSteps({ draftId }) {
             <div className="mt-5 flex flex-col items-stretch justify-between gap-3 sm:flex-row">
                 <button
                     onClick={prev}
-                    disabled={step === 1}
+                    disabled={step === 1 || submitting}
                     className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
                 >
-                    <ArrowLeft size={16}/> Voltar
+                    <ArrowLeft size={16} /> Voltar
                 </button>
 
                 {step < 5 ? (
                     <button
                         onClick={next}
-                        className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                        disabled={submitting}
+                        className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
                     >
-                        Próximo <ArrowRight size={16}/>
+                        Próximo <ArrowRight size={16} />
                     </button>
                 ) : (
                     <button
                         onClick={finish}
-                        className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                        disabled={submitting}
+                        className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
                     >
-                        <CheckCircle2 size={16}/> Finalizar
+                        {submitting ? "Enviando..." : <><CheckCircle2 size={16} /> Finalizar</>}
                     </button>
                 )}
             </div>
