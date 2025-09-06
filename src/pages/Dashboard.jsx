@@ -221,32 +221,62 @@ function Kpi({ icon, title, value, hint }) {
     );
 }
 
+// Substitua o componente RecordCard inteiro por este
 function RecordCard({ record }) {
-    const { nome, dataAtendimento, paSistolica, paDiastolica, pesoKg, alturaCm, glicemiaCapilar } = record || {};
-    const pa = (paSistolica != null && paDiastolica != null) ? `${paSistolica}/${paDiastolica} mmHg` : "—";
+    const navigate = useNavigate();
+    const {
+        _id,
+        nome,
+        dataAtendimento,
+        paSistolica,
+        paDiastolica,
+        pesoKg,
+        alturaCm,
+        glicemiaCapilar
+    } = record || {};
+
+    const pa =
+        paSistolica != null && paDiastolica != null
+            ? `${paSistolica}/${paDiastolica} mmHg`
+            : "—";
     const peso = pesoKg != null ? `${pesoKg} kg` : "—";
     const altura = alturaCm != null ? `${alturaCm} cm` : "—";
     const glicemia = glicemiaCapilar || "—";
 
     return (
-        <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md hover:border-gray-300">
+        <button
+            type="button"
+            onClick={() => navigate(`/records/${_id}`)}
+            className="group w-full text-left rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            aria-label={`Abrir prontuário de ${nome || "paciente"}`}
+        >
             <div className="mb-3 flex items-start justify-between gap-3">
                 <div>
                     <div className="text-sm text-gray-500">{dataAtendimento || "—"}</div>
-                    <h3 className="mt-0.5 text-base font-semibold text-gray-900">{nome || "Paciente"}</h3>
+                    <h3 className="mt-0.5 text-base font-semibold text-gray-900 group-hover:text-gray-800">
+                        {nome || "Paciente"}
+                    </h3>
                 </div>
-                <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">Prontuário</span>
+                <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+          Prontuário
+        </span>
             </div>
 
             <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                <InfoRow label="PA" value={pa}/>
-                <InfoRow label="Glicemia" value={glicemia}/>
-                <InfoRow label="Peso" value={peso}/>
-                <InfoRow label="Altura" value={altura}/>
+                <InfoRow label="PA" value={pa} />
+                <InfoRow label="Glicemia" value={glicemia} />
+                <InfoRow label="Peso" value={peso} />
+                <InfoRow label="Altura" value={altura} />
             </dl>
-        </div>
+
+            <div className="mt-4 inline-flex items-center gap-2 text-xs text-gray-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Clique para abrir
+            </div>
+        </button>
     );
 }
+
 
 function InfoRow({ label, value }) {
     return (

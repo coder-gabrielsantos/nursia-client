@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import RecordForm from "./pages/RecordForm";
+import RecordView from "./pages/RecordView";
 
 function ProtectedRoute({ children }) {
     const key = sessionStorage.getItem("nursia_access_key");
@@ -72,6 +73,7 @@ export default function App() {
                     />
                     {/* Fallback */}
                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/records/:id" element={<RecordView />} />
                 </Routes>
             </Layout>
         </BrowserRouter>
