@@ -8,13 +8,15 @@ export default function Navbar() {
 
     function handleLogout() {
         sessionStorage.removeItem("nursia_access_key");
+        sessionStorage.removeItem("nursia_admin_key"); // <- importante
+        sessionStorage.removeItem("nursia_role");      // <- opcional
         navigate("/login");
     }
 
     return (
         <header className="fixed inset-x-0 top-0 z-40 border-b border-gray-200/70 bg-white/60 backdrop-blur-xl">
             <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 md:px-8 lg:px-12">
-            {/* Brand */}
+                {/* Brand */}
                 <div
                     onClick={() => navigate("/dashboard")}
                     className="flex cursor-pointer items-center gap-2"

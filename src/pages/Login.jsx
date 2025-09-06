@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { verifyAccessKey } from "../services/api";
+import { loginWithSinglePassword } from "../services/api";
 import {
     Eye, EyeOff, ClipboardList, Sparkles, Heart, Zap, CheckCircle2,
 } from "lucide-react";
@@ -8,12 +8,9 @@ import {
 export default function Login() {
     const navigate = useNavigate();
 
-    const [key, setKey] = useState("");
+    const [password, setPassword] = useState("");
     const [show, setShow] = useState(false);
-
     const [isAdmin, setIsAdmin] = useState(false);
-    const [adminKey, setAdminKey] = useState("");
-    const [showAdmin, setShowAdmin] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
@@ -21,36 +18,34 @@ export default function Login() {
     useEffect(() => {
         const existing = sessionStorage.getItem("nursia_access_key");
         if (existing) navigate("/dashboard");
-
-        const existingAdmin = sessionStorage.getItem("nursia_admin_key");
-        if (existingAdmin) {
-            setIsAdmin(true);
-            setAdminKey(existingAdmin);
-        }
     }, [navigate]);
 
     async function handleSubmit(e) {
         e.preventDefault();
         setErr("");
         setLoading(true);
+        try {
+            const { role, accessKey, adminKey } = await loginWithSinglePassword({
+                password: password.trim(),
+                asAdmin: isAdmin,
+            });
 
-        const { ok, error } = await verifyAccessKey(key.trim());
-        setLoading(false);
+            // Guarda as chaves conforme o backend
+            sessionStorage.setItem("nursia_access_key", accessKey);
+            if (adminKey) sessionStorage.setItem("nursia_admin_key", adminKey);
+            else sessionStorage.removeItem("nursia_admin_key");
+            // opcional: role para exibir coisas no UI
+            if (role) sessionStorage.setItem("nursia_role", role);
 
-        if (!ok) {
-            setErr(error || "Chave inválida");
-            return;
+            navigate("/dashboard");
+        } catch (e) {
+            const msg =
+                e?.response?.data?.error ||
+                (e?.response?.status === 401 ? "Senha inválida" : "Falha de conexão");
+            setErr(msg);
+        } finally {
+            setLoading(false);
         }
-
-        sessionStorage.setItem("nursia_access_key", key.trim());
-
-        if (isAdmin && adminKey.trim()) {
-            sessionStorage.setItem("nursia_admin_key", adminKey.trim());
-        } else {
-            sessionStorage.removeItem("nursia_admin_key");
-        }
-
-        navigate("/dashboard");
     }
 
     return (
@@ -64,7 +59,6 @@ export default function Login() {
             {/* Conteúdo centralizado */}
             <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl items-center justify-center px-6 md:px-12 lg:px-20 py-12">
                 <div className="grid w-full gap-12 md:grid-cols-2 md:items-center">
-
                     {/* ESQUERDA — some totalmente em telas <1080px */}
                     <div className="flex flex-col justify-center space-y-6 max-[1080px]:hidden">
                         <h1 className="text-4xl font-semibold leading-tight text-gray-900">
@@ -79,55 +73,35 @@ export default function Login() {
 
                         {/* Features com ícones Lucide */}
                         <div className="mt-6 grid grid-cols-2 gap-6">
-                            <Feature
-                                icon={<ClipboardList size={18}/>}
-                                title="Informações essenciais"
-                                desc="Acesso direto ao que você precisa para o cuidado."
-                                color="from-blue-500 to-indigo-500"
-                            />
-                            <Feature
-                                icon={<Sparkles size={18}/>}
-                                title="Clareza"
-                                desc="Tela limpa e fácil de navegar."
-                                color="from-pink-500 to-rose-500"
-                            />
-                            <Feature
-                                icon={<Heart size={18}/>}
-                                title="Apoio ao cuidado"
-                                desc="Facilita o acompanhamento do paciente."
-                                color="from-green-500 to-emerald-500"
-                            />
-                            <Feature
-                                icon={<Zap size={18}/>}
-                                title="Praticidade"
-                                desc="Rápido para o dia a dia na unidade."
-                                color="from-yellow-500 to-orange-500"
-                            />
+                            <Feature icon={<ClipboardList size={18}/>} title="Informações essenciais" desc="Acesso direto ao que você precisa para o cuidado." color="from-blue-500 to-indigo-500"/>
+                            <Feature icon={<Sparkles size={18}/>} title="Clareza" desc="Tela limpa e fácil de navegar." color="from-pink-500 to-rose-500"/>
+                            <Feature icon={<Heart size={18}/>} title="Apoio ao cuidado" desc="Facilita o acompanhamento do paciente." color="from-green-500 to-emerald-500"/>
+                            <Feature icon={<Zap size={18}/>} title="Praticidade" desc="Rápido para o dia a dia na unidade." color="from-yellow-500 to-orange-500"/>
                         </div>
                     </div>
 
-                    {/* DIREITA — Card de login, ocupa toda a largura se esquerda some */}
+                    {/* DIREITA — Card de login */}
                     <div className="mx-auto w-full max-w-md max-[1080px]:col-span-2">
                         <div className="rounded-3xl border border-gray-200 bg-white p-10 shadow-xl">
                             <header className="mb-6 text-center">
                                 <h2 className="text-2xl font-semibold text-gray-900">Entrar</h2>
                                 <p className="mt-2 text-sm text-gray-600">
-                                    Digite sua <span className="font-medium text-gray-900">chave de acesso</span> para continuar.
+                                    Digite sua <span className="font-medium text-gray-900">senha</span> para continuar.
                                 </p>
                             </header>
 
                             <form className="space-y-5" onSubmit={handleSubmit}>
-                                {/* Chave de acesso */}
+                                {/* Senha única */}
                                 <label className="block">
                                     <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
-                                        Chave de acesso
+                                        Senha
                                     </span>
                                     <div className="relative">
                                         <input
                                             type={show ? "text" : "password"}
                                             required
-                                            value={key}
-                                            onChange={(e) => setKey(e.target.value)}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
                                             className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 pr-10 text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                             placeholder="••••••••"
                                         />
@@ -135,59 +109,23 @@ export default function Login() {
                                             type="button"
                                             onClick={() => setShow((s) => !s)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                            aria-label={show ? "Ocultar chave" : "Mostrar chave"}
+                                            aria-label={show ? "Ocultar senha" : "Mostrar senha"}
                                         >
                                             {show ? <EyeOff size={20}/> : <Eye size={20}/>}
                                         </button>
                                     </div>
                                 </label>
 
-                                {/* Toggle É admin? */}
+                                {/* Toggle É admin? (só define a intenção) */}
                                 <label className="flex items-center gap-2 text-sm text-gray-800 select-none">
                                     <input
                                         type="checkbox"
-                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-200"
+                                        className="cursor-pointer h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-200"
                                         checked={isAdmin}
-                                        onChange={(e) => {
-                                            const checked = e.target.checked;
-                                            setIsAdmin(checked);
-                                            if (!checked) {
-                                                setAdminKey("");
-                                                sessionStorage.removeItem("nursia_admin_key");
-                                            }
-                                        }}
+                                        onChange={(e) => setIsAdmin(e.target.checked)}
                                     />
-                                    É admin?
+                                    Sou administrador
                                 </label>
-
-                                {/* Campo Admin key (condicional) */}
-                                {isAdmin && (
-                                    <label className="block">
-                                        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
-                                            Admin key
-                                        </span>
-                                        <div className="relative">
-                                            <input
-                                                type={showAdmin ? "text" : "password"}
-                                                value={adminKey}
-                                                onChange={(e) => setAdminKey(e.target.value)}
-                                                className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 pr-10 text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                                placeholder="••••••••"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowAdmin((s) => !s)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                                aria-label={showAdmin ? "Ocultar admin key" : "Mostrar admin key"}
-                                            >
-                                                {showAdmin ? <EyeOff size={20}/> : <Eye size={20}/>}
-                                            </button>
-                                        </div>
-                                        <p className="mt-1 text-xs text-gray-500">
-                                            Opcional. Necessária apenas para ações administrativas.
-                                        </p>
-                                    </label>
-                                )}
 
                                 {err && (
                                     <div className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">

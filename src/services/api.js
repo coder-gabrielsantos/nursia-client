@@ -1,8 +1,7 @@
 import axios from "axios";
 
 // Use a env var e mantenha um fallback local para dev
-const API_BASE_URL =
-    import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -19,7 +18,17 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-/** Verifica somente a access key chamando um endpoint protegido por checkAccess */
+/** NOVO: login com uma senha + checkbox (asAdmin) */
+export async function loginWithSinglePassword({ password, asAdmin }) {
+    const { data } = await axios.post(`${API_BASE_URL}/auth/login`, {
+        password,
+        asAdmin: !!asAdmin,
+    });
+    // data: { role:'nurse'|'admin', accessKey, adminKey? }
+    return data;
+}
+
+/** (Opcional) Antigo "verifyAccessKey" pode ser aposentado */
 export async function verifyAccessKey(key) {
     try {
         const res = await axios.get(`${API_BASE_URL}/records`, {
@@ -39,28 +48,28 @@ export async function verifyAccessKey(key) {
 export async function listRecords(params = {}) {
     const { q } = params;
     const res = await api.get("/records", { params: { q } });
-    return res.data; // array
+    return res.data;
 }
 
-/** Cria prontuário (requer access; pode requerer admin conforme sua rota) */
+/** Cria prontuário (exige admin) */
 export async function createRecord(payload) {
     const res = await api.post("/records", payload);
-    return res.data; // objeto criado
+    return res.data;
 }
 
-/** Lê um prontuário pelo id */
+/** Lê prontuário */
 export async function getRecord(id) {
     const res = await api.get(`/records/${id}`);
     return res.data;
 }
 
-/** Atualiza um prontuário (PUT/PATCH conforme seu backend) */
+/** Atualiza prontuário (exige admin) */
 export async function updateRecord(id, payload) {
     const res = await api.put(`/records/${id}`, payload);
     return res.data;
 }
 
-/** Exclui um prontuário (normalmente exige admin) */
+/** Exclui prontuário (exige admin) */
 export async function deleteRecord(id) {
     const res = await api.delete(`/records/${id}`);
     return res.data;
