@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getRecord } from "../services/api";
+import { getRecord, deleteRecord } from "../services/api";
 import {
     ArrowLeft,
-    FileText,
-    CalendarDays,
     HeartPulse,
     Activity,
+    Pencil,
+    Trash2,
 } from "lucide-react";
 
 /* Helpers */
@@ -39,6 +39,26 @@ export default function RecordView() {
     }, [id]);
 
     const title = useMemo(() => data?.nome || "Prontuário", [data?.nome]);
+    const isAdmin = !!sessionStorage.getItem("nursia_admin_key");
+
+    async function handleDelete() {
+        if (!isAdmin) return;
+        const ok = window.confirm("Tem certeza que deseja excluir este prontuário?");
+        if (!ok) return;
+        try {
+            await deleteRecord(id);
+            alert("Prontuário excluído com sucesso.");
+            navigate(-1);
+        } catch (e) {
+            const msg = e?.response?.data?.error || "Não foi possível excluir.";
+            alert(msg);
+        }
+    }
+
+    function handleEdit() {
+        if (!isAdmin) return;
+        navigate(`/records/${id}/edit`);
+    }
 
     return (
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-10 py-10">
@@ -63,16 +83,34 @@ export default function RecordView() {
                             </p>
                         </div>
 
-                        {/* Botão de voltar */}
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
-                        >
-                            <ArrowLeft size={16} /> Voltar
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+                            >
+                                <ArrowLeft size={16}/> Voltar
+                            </button>
+                            {isAdmin && (
+                                <>
+                                    <button
+                                        onClick={handleEdit}
+                                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+                                        title="Editar prontuário"
+                                    >
+                                        <Pencil size={16}/> Editar
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
+                                        title="Excluir prontuário"
+                                    >
+                                        <Trash2 size={16}/> Excluir
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
-
 
                 {/* Body */}
                 <div className="p-6 sm:p-8 space-y-8">
