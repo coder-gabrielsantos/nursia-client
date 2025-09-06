@@ -221,7 +221,7 @@ function FormSteps({ draftId }) {
                     <button
                         onClick={finish}
                         disabled={submitting}
-                        className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60 sm:flex-none sm:w-40"
+                        className="cursor-pointer inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60 sm:flex-none sm:w-40"
                     >
                         {submitting ? "Enviando..." : (<><CheckCircle2 size={16}/> Finalizar</>)}
                     </button>
