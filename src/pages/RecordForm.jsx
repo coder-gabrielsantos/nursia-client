@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createDraft, deleteDraft } from "../hooks/useRecordDraft";
-import useRecordDraft from "../hooks/useRecordDraft";
 import { createRecord } from "../services/api";
+import useRecordDraft from "../hooks/useRecordDraft";
 import {
     ArrowLeft,
     ArrowRight,
@@ -29,7 +29,7 @@ export default function RecordForm({ mode = "create" }) {
     }, [mode, draftId, navigate]);
 
     if (!draftId) return null;
-    return <FormSteps draftId={draftId} />;
+    return <FormSteps draftId={draftId}/>;
 }
 
 function FormSteps({ draftId }) {
@@ -118,7 +118,7 @@ function FormSteps({ draftId }) {
                                 className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
                                 aria-label="Voltar"
                             >
-                                <ArrowLeft size={14} />
+                                <ArrowLeft size={14}/>
                             </button>
 
                             <div className="min-w-0">
@@ -139,7 +139,7 @@ function FormSteps({ draftId }) {
                         {/* Direita */}
                         <div className="flex items-center gap-3 sm:gap-4">
                             <div className="hidden sm:flex items-center gap-2">
-                                <Progress value={progress} small />
+                                <Progress value={progress} small/>
                                 <span className="text-[11px] text-gray-600">
                                     {Math.round(progress)}%
                                 </span>
@@ -153,20 +153,20 @@ function FormSteps({ draftId }) {
                                 className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
                                 aria-label="Salvar rascunho"
                             >
-                                <Save size={14} />
+                                <Save size={14}/>
                                 <span className="hidden sm:inline">Salvar</span>
                             </button>
                         </div>
                     </div>
 
                     <div className="border-t border-gray-200 px-1.5 sm:px-4 md:px-8 py-1.5">
-                        <Stepper current={step} />
+                        <Stepper current={step}/>
                     </div>
                 </div>
             </div>
 
             {/* Espaço após sticky */}
-            <div className="h-3" />
+            <div className="h-3"/>
 
             {/* Aviso de erro no envio */}
             {submitErr && (
@@ -183,7 +183,7 @@ function FormSteps({ draftId }) {
                             title="Anamnese"
                             description="Dados iniciais para identificação e histórico clínico atual."
                         >
-                            <Step1_Anamnese data={draft.data} onChange={updateData} />
+                            <Step1_Anamnese data={draft.data} onChange={updateData}/>
                         </FormSection>
                     )}
                     {step === 2 && (
@@ -191,7 +191,7 @@ function FormSteps({ draftId }) {
                             title="Necessidades Psicossociais"
                             description="Hábitos e fatores sociais relevantes ao cuidado."
                         >
-                            <Step2_PsicoSociais data={draft.data} onChange={updateData} />
+                            <Step2_PsicoSociais data={draft.data} onChange={updateData}/>
                         </FormSection>
                     )}
                     {step === 3 && (
@@ -199,7 +199,7 @@ function FormSteps({ draftId }) {
                             title="Necessidades Psicobiológicas"
                             description="Rotinas de cuidado, sono, nutrição e atividades."
                         >
-                            <Step3_PsicoBiologicas data={draft.data} onChange={updateData} />
+                            <Step3_PsicoBiologicas data={draft.data} onChange={updateData}/>
                         </FormSection>
                     )}
                     {step === 4 && (
@@ -207,7 +207,7 @@ function FormSteps({ draftId }) {
                             title="Condições de Moradia"
                             description="Infraestrutura, saneamento e composição familiar."
                         >
-                            <Step4_Moradia data={draft.data} onChange={updateData} />
+                            <Step4_Moradia data={draft.data} onChange={updateData}/>
                         </FormSection>
                     )}
                     {step === 5 && (
@@ -215,7 +215,7 @@ function FormSteps({ draftId }) {
                             title="Medidas e Sinais"
                             description="Registre medidas vitais e observações finais."
                         >
-                            <Step5_Medidas data={draft.data} onChange={updateData} />
+                            <Step5_Medidas data={draft.data} onChange={updateData}/>
                         </FormSection>
                     )}
                 </div>
@@ -228,7 +228,7 @@ function FormSteps({ draftId }) {
                     disabled={step === 1 || submitting}
                     className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
                 >
-                    <ArrowLeft size={16} /> Voltar
+                    <ArrowLeft size={16}/> Voltar
                 </button>
 
                 {step < 5 ? (
@@ -237,7 +237,7 @@ function FormSteps({ draftId }) {
                         disabled={submitting}
                         className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
                     >
-                        Próximo <ArrowRight size={16} />
+                        Próximo <ArrowRight size={16}/>
                     </button>
                 ) : (
                     <button
@@ -247,7 +247,7 @@ function FormSteps({ draftId }) {
                     >
                         {submitting ? "Enviando..." : (
                             <>
-                                <CheckCircle2 size={16} /> Finalizar
+                                <CheckCircle2 size={16}/> Finalizar
                             </>
                         )}
                     </button>
@@ -338,7 +338,7 @@ function Stepper({ current }) {
                                 ].join(" ")}
                                 aria-current={active ? "step" : undefined}
                             >
-                                {done ? <Check size={14} /> : n}
+                                {done ? <Check size={14}/> : n}
                             </div>
 
                             <span
@@ -418,7 +418,18 @@ const rsStyles = {
         boxShadow: state.isFocused ? "0 0 0 3px rgba(59,130,246,0.15)" : "none",
         "&:hover": { borderColor: state.isFocused ? "#3b82f6" : "#D1D5DB" },
     }),
-    menu: (base) => ({ ...base, zIndex: 40, borderRadius: 12 }),
+    menu: (base) => ({
+        ...base,
+        zIndex: 40,
+        borderRadius: 12,
+        overflow: "hidden",
+        marginTop: 4,
+    }),
+    menuList: (base) => ({
+        ...base,
+        padding: 0,
+        borderRadius: 12,
+    }),
     option: (base, state) => ({
         ...base,
         fontSize: 14,
@@ -428,6 +439,7 @@ const rsStyles = {
                 ? "rgba(59,130,246,0.08)"
                 : "white",
         color: "#111827",
+        cursor: "pointer",
     }),
 };
 
@@ -442,6 +454,7 @@ function RSelect({ label, value, onChange, options, placeholder = "Selecione" })
                 options={options}
                 placeholder={placeholder}
                 isClearable
+                isSearchable={false}
                 styles={rsStyles}
             />
         </label>
@@ -455,7 +468,7 @@ function Step1_Anamnese({ data = {}, onChange }) {
     return (
         <div className="space-y-8">
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="Nome" value={data.nome} onChange={(v) => onChange({ nome: v })} />
+                <Text label="Nome" value={data.nome} onChange={(v) => onChange({ nome: v })}/>
                 <Text
                     label="Data do atendimento"
                     type="date"
@@ -466,29 +479,29 @@ function Step1_Anamnese({ data = {}, onChange }) {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-3">
-                <Text label="Naturalidade" value={data.naturalidade} onChange={(v) => onChange({ naturalidade: v })} />
-                <Text label="Religião" value={data.religiao} onChange={(v) => onChange({ religiao: v })} />
+                <Text label="Naturalidade" value={data.naturalidade} onChange={(v) => onChange({ naturalidade: v })}/>
+                <Text label="Religião" value={data.religiao} onChange={(v) => onChange({ religiao: v })}/>
                 <RSelect
                     label="Sexo"
                     value={data.sexo}
                     onChange={(v) => onChange({ sexo: v })}
-                    options={[opt("F", "Feminino"), opt("M", "Masculino")]}
+                    options={[opt("M", "Masculino"), opt("F", "Feminino")]}
                 />
             </div>
 
             <div className="grid gap-6 sm:grid-cols-4">
-                <Text label="Idade" type="number" value={data.idade} onChange={(v) => onChange({ idade: v })} />
-                <Text label="Filhos (quantos)" type="number" value={data.filhos} onChange={(v) => onChange({ filhos: v })} />
-                <Text label="Raça" value={data.raca} onChange={(v) => onChange({ raca: v })} />
-                <Text label="Estado civil" value={data.estadoCivil} onChange={(v) => onChange({ estadoCivil: v })} />
+                <Text label="Idade" type="number" value={data.idade} onChange={(v) => onChange({ idade: v })}/>
+                <Text label="Filhos (quantos)" type="number" value={data.filhos} onChange={(v) => onChange({ filhos: v })}/>
+                <Text label="Raça" value={data.raca} onChange={(v) => onChange({ raca: v })}/>
+                <Text label="Estado civil" value={data.estadoCivil} onChange={(v) => onChange({ estadoCivil: v })}/>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="Escolaridade" value={data.escolaridade} onChange={(v) => onChange({ escolaridade: v })} />
-                <Text label="Profissão" value={data.profissao} onChange={(v) => onChange({ profissao: v })} />
+                <Text label="Escolaridade" value={data.escolaridade} onChange={(v) => onChange({ escolaridade: v })}/>
+                <Text label="Profissão" value={data.profissao} onChange={(v) => onChange({ profissao: v })}/>
             </div>
 
-            <Text label="Ocupação" value={data.ocupacao} onChange={(v) => onChange({ ocupacao: v })} />
+            <Text label="Ocupação" value={data.ocupacao} onChange={(v) => onChange({ ocupacao: v })}/>
 
             <Text
                 label="Diagnóstico médico atual"
@@ -508,8 +521,8 @@ function Step1_Anamnese({ data = {}, onChange }) {
                 ]}
             />
 
-            <Area label="Histórico da doença atual (HDA)" value={data.hda} onChange={(v) => onChange({ hda: v })} />
-            <Area label="História Progresso (HP)" value={data.hp} onChange={(v) => onChange({ hp: v })} />
+            <Area label="Histórico da doença atual (HDA)" value={data.hda} onChange={(v) => onChange({ hda: v })}/>
+            <Area label="História Progresso (HP)" value={data.hp} onChange={(v) => onChange({ hp: v })}/>
             <Area
                 label="Medicamentos usuais"
                 rows={3}
@@ -529,7 +542,7 @@ function Step1_Anamnese({ data = {}, onChange }) {
                     value={data.internacaoOndeQuando}
                     onChange={(v) => onChange({ internacaoOndeQuando: v })}
                 />
-                <Text label="Motivo(s)" value={data.internacaoMotivos} onChange={(v) => onChange({ internacaoMotivos: v })} />
+                <Text label="Motivo(s)" value={data.internacaoMotivos} onChange={(v) => onChange({ internacaoMotivos: v })}/>
             </div>
 
             <div>
@@ -570,8 +583,8 @@ function Step2_PsicoSociais({ data = {}, onChange }) {
                             opt(">3x_semana", "Mais que três vezes por semana"),
                         ]}
                     />
-                    <Text label="Tipo" value={data.etilismoTipo} onChange={(v) => onChange({ etilismoTipo: v })} />
-                    <Text label="Quantidade" value={data.etilismoQuantidade} onChange={(v) => onChange({ etilismoQuantidade: v })} />
+                    <Text label="Tipo" value={data.etilismoTipo} onChange={(v) => onChange({ etilismoTipo: v })}/>
+                    <Text label="Quantidade" value={data.etilismoQuantidade} onChange={(v) => onChange({ etilismoQuantidade: v })}/>
                 </div>
             </div>
 
@@ -582,8 +595,8 @@ function Step2_PsicoSociais({ data = {}, onChange }) {
                     onChange={(v) => onChange({ tabagista: v })}
                     options={[opt("sim", "Sim"), opt("nao", "Não"), opt("ex", "Ex-tabagista")]}
                 />
-                <Text label="Cigarros/dia" type="number" value={data.cigarrosDia} onChange={(v) => onChange({ cigarrosDia: v })} />
-                <Text label="Ex-tabagista há quanto tempo" value={data.exTabagistaTempo} onChange={(v) => onChange({ exTabagistaTempo: v })} />
+                <Text label="Cigarros/dia" type="number" value={data.cigarrosDia} onChange={(v) => onChange({ cigarrosDia: v })}/>
+                <Text label="Ex-tabagista há quanto tempo" value={data.exTabagistaTempo} onChange={(v) => onChange({ exTabagistaTempo: v })}/>
             </div>
         </div>
     );
@@ -668,7 +681,7 @@ function Step3_PsicoBiologicas({ data = {}, onChange }) {
                     onChange={(v) => onChange({ recreacaoFreq: v })}
                     options={[opt("3x_semana", "Três vezes/semana"), opt(">3x_semana", "Mais de três vezes/semana")]}
                 />
-                <Text label="Duração" value={data.recreacaoDuracao} onChange={(v) => onChange({ recreacaoDuracao: v })} />
+                <Text label="Duração" value={data.recreacaoDuracao} onChange={(v) => onChange({ recreacaoDuracao: v })}/>
             </div>
         </div>
     );
@@ -707,8 +720,8 @@ function Step4_Moradia({ data = {}, onChange }) {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="Quantos residem" type="number" value={data.qtdResidem} onChange={(v) => onChange({ qtdResidem: v })} />
-                <Text label="Quantos trabalham" type="number" value={data.qtdTrabalham} onChange={(v) => onChange({ qtdTrabalham: v })} />
+                <Text label="Quantos residem" type="number" value={data.qtdResidem} onChange={(v) => onChange({ qtdResidem: v })}/>
+                <Text label="Quantos trabalham" type="number" value={data.qtdTrabalham} onChange={(v) => onChange({ qtdTrabalham: v })}/>
             </div>
         </div>
     );
@@ -719,14 +732,14 @@ function Step5_Medidas({ data = {}, onChange }) {
     return (
         <div className="space-y-8">
             <div className="grid gap-6 sm:grid-cols-3">
-                <Text label="Peso (kg)" type="number" value={data.pesoKg} onChange={(v) => onChange({ pesoKg: v })} />
-                <Text label="Altura (cm)" type="number" value={data.alturaCm} onChange={(v) => onChange({ alturaCm: v })} />
-                <Text label="Glicemia capilar" value={data.glicemiaCapilar} onChange={(v) => onChange({ glicemiaCapilar: v })} />
+                <Text label="Peso (kg)" type="number" value={data.pesoKg} onChange={(v) => onChange({ pesoKg: v })}/>
+                <Text label="Altura (cm)" type="number" value={data.alturaCm} onChange={(v) => onChange({ alturaCm: v })}/>
+                <Text label="Glicemia capilar" value={data.glicemiaCapilar} onChange={(v) => onChange({ glicemiaCapilar: v })}/>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="PA sistólica (mmHg)" type="number" value={data.paSistolica} onChange={(v) => onChange({ paSistolica: v })} />
-                <Text label="PA diastólica (mmHg)" type="number" value={data.paDiastolica} onChange={(v) => onChange({ paDiastolica: v })} />
+                <Text label="PA sistólica (mmHg)" type="number" value={data.paSistolica} onChange={(v) => onChange({ paSistolica: v })}/>
+                <Text label="PA diastólica (mmHg)" type="number" value={data.paDiastolica} onChange={(v) => onChange({ paDiastolica: v })}/>
             </div>
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">

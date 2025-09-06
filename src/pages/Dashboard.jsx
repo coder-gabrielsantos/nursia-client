@@ -10,11 +10,11 @@ import {
     HeartPulse,
     Activity,
     Filter,
-    ArrowUpDown,
     ChevronLeft,
     ChevronRight,
     CalendarDays,
 } from "lucide-react";
+import SelectRS from "react-select";
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function Dashboard() {
 
     // filtros
     const [q, setQ] = useState("");
-    const [sortBy, setSortBy] = useState("recent"); // recent | name
+    const [sortBy, setSortBy] = useState("recent"); // recent | oldest | name
 
     // flag local para saber se é admin (existe admin key no sessionStorage)
     const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem("nursia_admin_key"));
@@ -33,7 +33,6 @@ export default function Dashboard() {
     useEffect(() => {
         const check = () => setIsAdmin(!!sessionStorage.getItem("nursia_admin_key"));
         window.addEventListener("storage", check);
-        // também checa ao focar a aba
         window.addEventListener("focus", check);
         return () => {
             window.removeEventListener("storage", check);
@@ -80,13 +79,13 @@ export default function Dashboard() {
         const list = [...raw];
         list.sort((a, b) => {
             if (sortBy === "recent") return parseBR(b.dataAtendimento) - parseBR(a.dataAtendimento);
+            if (sortBy === "oldest") return parseBR(a.dataAtendimento) - parseBR(b.dataAtendimento);
             if (sortBy === "name") return (a?.nome || "").localeCompare(b?.nome || "");
             return 0;
         });
         return list;
     }, [raw, sortBy]);
 
-    // paginação dos prontuários (igual estilo aos rascunhos)
     const [recPage, setRecPage] = useState(1);
     const recPageSize = 9; // 3 colunas x 3 linhas (ajuste se quiser)
     const recTotalPages = Math.max(1, Math.ceil(items.length / recPageSize));
@@ -94,7 +93,6 @@ export default function Dashboard() {
     const visibleRecords = items.slice(recStart, recStart + recPageSize);
 
     useEffect(() => {
-        // ao mudar filtro/ordenação, manter página dentro do range
         const newTotal = Math.max(1, Math.ceil(items.length / recPageSize));
         if (recPage > newTotal) setRecPage(newTotal);
     }, [items, recPage]);
@@ -175,25 +173,19 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Select moderno */}
+                    {/* RSelect */}
                     <div className="w-full md:w-64">
-                        <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-600">
-                            Ordenar
-                        </label>
-                        <div className="relative">
-                            <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="h-11 w-full appearance-none rounded-xl border border-gray-300 bg-white pl-3 pr-10 text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            >
-                                <option value="recent">Mais recentes</option>
-                                <option value="name">Nome (A–Z)</option>
-                            </select>
-                            <ArrowUpDown
-                                size={16}
-                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            />
-                        </div>
+                        <RSelect
+                            label="Ordenar"
+                            value={sortBy}
+                            onChange={(v) => setSortBy(v || "recent")}
+                            options={[
+                                opt("recent", "Mais recentes"),
+                                opt("oldest", "Mais antigos"),
+                                opt("name", "Nome (A–Z)"),
+                            ]}
+                            placeholder="Selecione"
+                        />
                     </div>
 
                     {/* Ações dos filtros */}
@@ -354,6 +346,71 @@ function SkeletonGrid() {
     );
 }
 
+/* ---------- RSelect (mesmo padrão do RecordForm) ---------- */
+
+function FieldLabel({ children }) {
+    return (
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-700">
+      {children}
+    </span>
+    );
+}
+
+const rsStyles = {
+    control: (base, state) => ({
+        ...base,
+        minHeight: 44,
+        borderRadius: 12,
+        borderColor: state.isFocused ? "#3b82f6" : "#D1D5DB",
+        boxShadow: state.isFocused ? "0 0 0 3px rgba(59,130,246,0.15)" : "none",
+        "&:hover": { borderColor: state.isFocused ? "#3b82f6" : "#D1D5DB" },
+    }),
+    menu: (base) => ({
+        ...base,
+        zIndex: 40,
+        borderRadius: 12,
+        overflow: "hidden",
+        marginTop: 4,
+    }),
+    menuList: (base) => ({
+        ...base,
+        padding: 0,
+        borderRadius: 12,
+    }),
+    option: (base, state) => ({
+        ...base,
+        fontSize: 14,
+        backgroundColor: state.isSelected
+            ? "rgba(59,130,246,0.12)"
+            : state.isFocused
+                ? "rgba(59,130,246,0.08)"
+                : "white",
+        color: "#111827",
+        cursor: "pointer",
+    }),
+};
+
+function RSelect({ label, value, onChange, options, placeholder = "Selecione" }) {
+    const selected = options.find((o) => o.value === value) || null;
+    return (
+        <label className="block">
+            <FieldLabel>{label}</FieldLabel>
+            <SelectRS
+                value={selected}
+                onChange={(opt) => onChange(opt ? opt.value : "")}
+                options={options}
+                placeholder={placeholder}
+                isClearable
+                isSearchable={false}
+                styles={rsStyles}
+            />
+        </label>
+    );
+}
+
+const opt = (value, label) => ({ value, label });
+
+/* ---------- Rascunhos ---------- */
 function Rascunhos() {
     const [drafts, setDrafts] = useState([]);
     const navigate = useNavigate();
@@ -368,7 +425,6 @@ function Rascunhos() {
     useEffect(() => {
         const data = listDrafts();
         setDrafts(data);
-        // corrige página se apagar/alterar quantidade
         const newTotal = Math.max(1, Math.ceil(data.length / pageSize));
         if (page > newTotal) setPage(newTotal);
     }, [page]);

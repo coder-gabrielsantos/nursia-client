@@ -19,11 +19,9 @@ export default function Login() {
     const [err, setErr] = useState("");
 
     useEffect(() => {
-        // Se já logado, redireciona
         const existing = sessionStorage.getItem("nursia_access_key");
         if (existing) navigate("/dashboard");
 
-        // Se já tem admin key salva, pré-marca o "É admin?"
         const existingAdmin = sessionStorage.getItem("nursia_admin_key");
         if (existingAdmin) {
             setIsAdmin(true);
@@ -36,7 +34,6 @@ export default function Login() {
         setErr("");
         setLoading(true);
 
-        // Valida somente a access key (rota protegida por checkAccess)
         const { ok, error } = await verifyAccessKey(key.trim());
         setLoading(false);
 
@@ -45,10 +42,8 @@ export default function Login() {
             return;
         }
 
-        // Salva access key
         sessionStorage.setItem("nursia_access_key", key.trim());
 
-        // Salva/limpa admin key conforme toggle
         if (isAdmin && adminKey.trim()) {
             sessionStorage.setItem("nursia_admin_key", adminKey.trim());
         } else {
@@ -69,13 +64,9 @@ export default function Login() {
             {/* Conteúdo centralizado */}
             <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl items-center justify-center px-6 md:px-12 lg:px-20 py-12">
                 <div className="grid w-full gap-12 md:grid-cols-2 md:items-center">
-                    {/* ESQUERDA — oculta em telas pequenas */}
-                    <div className="hidden md:flex flex-col justify-center space-y-6">
-                        <div className="mb-2 inline-flex items-center gap-2">
-                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600"/>
-                            <span className="text-2xl font-semibold text-gray-900">Nursia</span>
-                        </div>
 
+                    {/* ESQUERDA — some totalmente em telas <1080px */}
+                    <div className="flex flex-col justify-center space-y-6 max-[1080px]:hidden">
                         <h1 className="text-4xl font-semibold leading-tight text-gray-900">
                             Bem-vindo à{" "}
                             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -83,7 +74,7 @@ export default function Login() {
                             </span>
                         </h1>
                         <p className="max-w-md text-base leading-relaxed text-gray-700">
-                            Uma plataforma feita para apoiar a prática de enfermagem no CAPS — informações essenciais e foco no cuidado ao paciente.
+                            Uma solução criada para apoiar a atuação de enfermagem no CAPS — reunindo conteúdos essenciais e priorizando o cuidado ao paciente.
                         </p>
 
                         {/* Features com ícones Lucide */}
@@ -115,8 +106,8 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {/* DIREITA — Card de login */}
-                    <div className="mx-auto w-full max-w-md">
+                    {/* DIREITA — Card de login, ocupa toda a largura se esquerda some */}
+                    <div className="mx-auto w-full max-w-md max-[1080px]:col-span-2">
                         <div className="rounded-3xl border border-gray-200 bg-white p-10 shadow-xl">
                             <header className="mb-6 text-center">
                                 <h2 className="text-2xl font-semibold text-gray-900">Entrar</h2>
@@ -161,7 +152,6 @@ export default function Login() {
                                             const checked = e.target.checked;
                                             setIsAdmin(checked);
                                             if (!checked) {
-                                                // desliga: limpa admin key salva
                                                 setAdminKey("");
                                                 sessionStorage.removeItem("nursia_admin_key");
                                             }
@@ -222,18 +212,18 @@ export default function Login() {
                             </div>
 
                             {/* Checklist informativo */}
-                            <ul className="space-y-2 text-sm text-gray-600">
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle2 size={16} className="mt-0.5 text-green-600"/>
-                                    <span>Somente dados de enfermagem ficam disponíveis.</span>
+                            <ul className="space-y-2 text-xs sm:text-sm text-gray-600">
+                                <li className="flex items-center gap-2 whitespace-nowrap">
+                                    <CheckCircle2 size={16} className="text-green-600" />
+                                    <span>Somente dados de enfermagem ficam disponíveis</span>
                                 </li>
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle2 size={16} className="mt-0.5 text-green-600"/>
-                                    <span>Facilidade para acompanhar histórico do paciente.</span>
+                                <li className="flex items-center gap-2 whitespace-nowrap">
+                                    <CheckCircle2 size={16} className="text-green-600" />
+                                    <span>Facilidade para acompanhar histórico do paciente</span>
                                 </li>
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle2 size={16} className="mt-0.5 text-green-600"/>
-                                    <span>Conteúdo organizado para apoiar seu trabalho diário.</span>
+                                <li className="flex items-center gap-2 whitespace-nowrap">
+                                    <CheckCircle2 size={16} className="text-green-600" />
+                                    <span>Conteúdo organizado para apoiar seu trabalho diário</span>
                                 </li>
                             </ul>
 
