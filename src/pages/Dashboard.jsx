@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { listDrafts, deleteDraft } from "../hooks/useRecordDraft";
 import { listRecords } from "../services/api";
 import {
-    Plus, RefreshCw, Search, TrendingUp, HeartPulse, Activity, Filter, ArrowUpDown, FileEdit, Trash2, Play
+    Plus, RefreshCw, Search, TrendingUp, HeartPulse, Activity, Filter, ArrowUpDown, ChevronLeft, ChevronRight
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -15,6 +15,21 @@ export default function Dashboard() {
     // filtros
     const [q, setQ] = useState("");
     const [sortBy, setSortBy] = useState("recent"); // recent | name
+
+    // flag local para saber se é admin (existe admin key no sessionStorage)
+    const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem("nursia_admin_key"));
+
+    // mantém flag em sincronia caso a key seja atualizada em outra aba
+    useEffect(() => {
+        const check = () => setIsAdmin(!!sessionStorage.getItem("nursia_admin_key"));
+        window.addEventListener("storage", check);
+        // também checa ao focar a aba
+        window.addEventListener("focus", check);
+        return () => {
+            window.removeEventListener("storage", check);
+            window.removeEventListener("focus", check);
+        };
+    }, []);
 
     async function fetchData() {
         try {
@@ -77,12 +92,16 @@ export default function Dashboard() {
                     >
                         <RefreshCw size={16}/> Atualizar
                     </button>
-                    <button
-                        onClick={() => navigate("/records/new")}
-                        className="inline-flex h-10 items-center gap-2 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
-                    >
-                        <Plus size={16}/> Novo prontuário
-                    </button>
+
+                    {/* Só admins veem o botão de novo prontuário */}
+                    {isAdmin && (
+                        <button
+                            onClick={() => navigate("/records/new")}
+                            className="inline-flex h-10 items-center gap-2 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
+                        >
+                            <Plus size={16}/> Novo prontuário
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -164,7 +183,8 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <Rascunhos/>
+            {/* Rascunhos: só admins conseguem criar/retomar formulários */}
+            {isAdmin && <Rascunhos/>}
 
             {/* Lista */}
             {loading ? (
@@ -260,39 +280,139 @@ function Rascunhos() {
     const [drafts, setDrafts] = useState([]);
     const navigate = useNavigate();
 
+    // paginação
+    const [page, setPage] = useState(1);
+    const pageSize = 4; // 2 colunas × 2 linhas
+    const totalPages = Math.max(1, Math.ceil(drafts.length / pageSize));
+    const start = (page - 1) * pageSize;
+    const visible = drafts.slice(start, start + pageSize);
+
     useEffect(() => {
-        setDrafts(listDrafts());
-    }, []);
+        const data = listDrafts();
+        setDrafts(data);
+        // corrige página se apagar/alterar quantidade
+        const newTotal = Math.max(1, Math.ceil(data.length / pageSize));
+        if (page > newTotal) setPage(newTotal);
+    }, [page]);
 
     if (drafts.length === 0) return null;
 
+    const go = (p) => setPage(Math.min(Math.max(1, p), totalPages));
+
     return (
-        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Rascunhos em andamento</h3>
-                <button onClick={() => setDrafts(listDrafts())} className="text-xs text-gray-600 hover:underline">Atualizar</button>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {drafts.map((d) => (
-                    <div key={d.id} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
-                        <div>
-                            <div className="text-sm font-medium text-gray-900">Rascunho #{d.id}</div>
-                            <div className="text-xs text-gray-500">Passo {d.step} de 5 • Atualizado {new Date(d.updatedAt).toLocaleString()}</div>
+        <section className="mb-6">
+            <header className="mb-3 flex items-center justify-between">
+                <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Rascunhos</h3>
+                    <p className="text-xs text-gray-500">
+                        {drafts.length} {drafts.length === 1 ? "item" : "itens"} em andamento
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {
+                            setDrafts(listDrafts());
+                            go(1);
+                        }}
+                        className="h-9 rounded-xl border border-gray-300 bg-white px-3 text-xs font-medium text-gray-800 hover:bg-gray-50"
+                        title="Recarregar rascunhos"
+                    >
+                        Atualizar
+                    </button>
+
+                    {/* Controles de paginação */}
+                    <nav className="inline-flex items-center gap-1">
+                        <button
+                            onClick={() => go(page - 1)}
+                            disabled={page === 1}
+                            className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50"
+                            aria-label="Página anterior"
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                        <span className="px-2 text-xs text-gray-600 tabular-nums">
+                            {page}/{totalPages}
+                        </span>
+                        <button
+                            onClick={() => go(page + 1)}
+                            disabled={page === totalPages}
+                            className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50"
+                            aria-label="Próxima página"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
+                    </nav>
+                </div>
+            </header>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {visible.map((d, i) => {
+                    const index = start + i + 1; // numerar 1,2,3...
+                    const pct = Math.min(100, Math.max(0, (d.step - 1) * 20));
+
+                    return (
+                        <div
+                            key={d.id}
+                            className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-3 shadow-sm transition hover:shadow-md hover:border-gray-300"
+                        >
+                            <div className="pointer-events-none absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-blue-500 to-indigo-500" />
+
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                    <span className="truncate text-sm font-semibold text-gray-900">
+                                      Rascunho #{index}
+                                    </span>
+                                    <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                                        {d.step}/5
+                                    </span>
+                                    </div>
+                                    <div className="mt-0.5 text-[11px] text-gray-500 truncate">
+                                        Atualizado {new Date(d.updatedAt).toLocaleString()}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-2 flex items-center gap-3">
+                                <span className="rounded-md bg-gray-50 px-2 py-1 text-[11px] text-gray-700 border border-gray-100">
+                                    {d.step < 5 ? "Em edição" : "Para finalizar"}
+                                </span>
+                                <div className="flex-1 h-2 rounded-full bg-gray-200 overflow-hidden">
+                                    <div
+                                        className="h-full bg-blue-600"
+                                        style={{ width: `${pct}%` }}
+                                    />
+                                </div>
+                                <span className="text-[11px] text-gray-600 tabular-nums">
+                                    {pct}%
+                                </span>
+                            </div>
+
+                            <div className="mt-3 flex items-center justify-end gap-2">
+                                <button
+                                    onClick={() => navigate(`/records/new/${d.id}`)}
+                                    className="h-8 rounded-lg bg-blue-600 px-3 text-xs font-medium text-white hover:bg-blue-700"
+                                >
+                                    Continuar
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        deleteDraft(d.id);
+                                        const data = listDrafts();
+                                        setDrafts(data);
+                                        const newTotal = Math.max(1, Math.ceil(data.length / pageSize));
+                                        if (page > newTotal) setPage(newTotal);
+                                    }}
+                                    className="h-8 rounded-lg border border-gray-300 bg-white px-3 text-xs font-medium text-gray-800 hover:bg-gray-50"
+                                >
+                                    Excluir
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => navigate(`/records/new/${d.id}`)} className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
-                                <Play size={14}/> Continuar
-                            </button>
-                            <button onClick={() => {
-                                deleteDraft(d.id);
-                                setDrafts(listDrafts());
-                            }} className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
-                                <Trash2 size={14}/> Excluir
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
-        </div>
+        </section>
     );
 }

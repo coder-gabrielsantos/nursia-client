@@ -16,12 +16,17 @@ export default function RecordForm({ mode = "create" }) {
     const { draftId } = useParams();
     const navigate = useNavigate();
 
+    // Guard para evitar criação dupla em StrictMode (efeito de double-invoke em dev)
+    const createdRef = useRef(false);
+
     useEffect(() => {
+        if (createdRef.current) return; // já criamos
         if (mode === "create" && !draftId) {
+            createdRef.current = true; // marca antes de criar
             const id = createDraft();
             navigate(`/records/new/${id}`, { replace: true });
         }
-    }, [draftId, mode, navigate]);
+    }, [mode, draftId, navigate]);
 
     if (!draftId) return null;
     return <FormSteps draftId={draftId} />;
@@ -240,7 +245,11 @@ function FormSteps({ draftId }) {
                         disabled={submitting}
                         className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
                     >
-                        {submitting ? "Enviando..." : <><CheckCircle2 size={16} /> Finalizar</>}
+                        {submitting ? "Enviando..." : (
+                            <>
+                                <CheckCircle2 size={16} /> Finalizar
+                            </>
+                        )}
                     </button>
                 )}
             </div>
@@ -273,7 +282,10 @@ function Progress({ value, small = false }) {
             aria-valuemax={100}
             aria-label="Progresso do formulário"
         >
-            <div className="h-full bg-blue-600 transition-[width] duration-300 ease-out" style={{ width: `${value}%` }}/>
+            <div
+                className="h-full bg-blue-600 transition-[width] duration-300 ease-out"
+                style={{ width: `${value}%` }}
+            />
         </div>
     );
 }
@@ -297,7 +309,11 @@ function Stepper({ current }) {
     }, [current]);
 
     return (
-        <div ref={scrollerRef} className="overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div
+            ref={scrollerRef}
+            className="overflow-x-auto no-scrollbar"
+            style={{ WebkitOverflowScrolling: "touch" }}
+        >
             <ol
                 className="inline-flex min-w-max items-center justify-start sm:justify-center px-2 py-1.5 gap-2 sm:gap-3"
                 aria-label="Progresso das etapas"
@@ -322,20 +338,29 @@ function Stepper({ current }) {
                                 ].join(" ")}
                                 aria-current={active ? "step" : undefined}
                             >
-                                {done ? <Check size={14}/> : n}
+                                {done ? <Check size={14} /> : n}
                             </div>
 
                             <span
                                 className={[
                                     "ml-2 mr-3 sm:mr-4 whitespace-nowrap text-sm",
-                                    done ? "text-emerald-700" : active ? "text-blue-700" : "text-gray-700",
+                                    done
+                                        ? "text-emerald-700"
+                                        : active
+                                            ? "text-blue-700"
+                                            : "text-gray-700",
                                 ].join(" ")}
                             >
                                 {label}
                             </span>
 
                             {n < steps.length && (
-                                <div className={["mr-3 sm:mr-4 h-[2px] w-8 sm:w-12", done ? "bg-emerald-300" : "bg-gray-200"].join(" ")}/>
+                                <div
+                                    className={[
+                                        "mr-3 sm:mr-4 h-[2px] w-8 sm:w-12",
+                                        done ? "bg-emerald-300" : "bg-gray-200",
+                                    ].join(" ")}
+                                />
                             )}
                         </li>
                     );
@@ -430,7 +455,7 @@ function Step1_Anamnese({ data = {}, onChange }) {
     return (
         <div className="space-y-8">
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="Nome" value={data.nome} onChange={(v) => onChange({ nome: v })}/>
+                <Text label="Nome" value={data.nome} onChange={(v) => onChange({ nome: v })} />
                 <Text
                     label="Data do atendimento"
                     type="date"
@@ -441,8 +466,8 @@ function Step1_Anamnese({ data = {}, onChange }) {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-3">
-                <Text label="Naturalidade" value={data.naturalidade} onChange={(v) => onChange({ naturalidade: v })}/>
-                <Text label="Religião" value={data.religiao} onChange={(v) => onChange({ religiao: v })}/>
+                <Text label="Naturalidade" value={data.naturalidade} onChange={(v) => onChange({ naturalidade: v })} />
+                <Text label="Religião" value={data.religiao} onChange={(v) => onChange({ religiao: v })} />
                 <RSelect
                     label="Sexo"
                     value={data.sexo}
@@ -452,18 +477,18 @@ function Step1_Anamnese({ data = {}, onChange }) {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-4">
-                <Text label="Idade" type="number" value={data.idade} onChange={(v) => onChange({ idade: v })}/>
-                <Text label="Filhos (quantos)" type="number" value={data.filhos} onChange={(v) => onChange({ filhos: v })}/>
-                <Text label="Raça" value={data.raca} onChange={(v) => onChange({ raca: v })}/>
-                <Text label="Estado civil" value={data.estadoCivil} onChange={(v) => onChange({ estadoCivil: v })}/>
+                <Text label="Idade" type="number" value={data.idade} onChange={(v) => onChange({ idade: v })} />
+                <Text label="Filhos (quantos)" type="number" value={data.filhos} onChange={(v) => onChange({ filhos: v })} />
+                <Text label="Raça" value={data.raca} onChange={(v) => onChange({ raca: v })} />
+                <Text label="Estado civil" value={data.estadoCivil} onChange={(v) => onChange({ estadoCivil: v })} />
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="Escolaridade" value={data.escolaridade} onChange={(v) => onChange({ escolaridade: v })}/>
-                <Text label="Profissão" value={data.profissao} onChange={(v) => onChange({ profissao: v })}/>
+                <Text label="Escolaridade" value={data.escolaridade} onChange={(v) => onChange({ escolaridade: v })} />
+                <Text label="Profissão" value={data.profissao} onChange={(v) => onChange({ profissao: v })} />
             </div>
 
-            <Text label="Ocupação" value={data.ocupacao} onChange={(v) => onChange({ ocupacao: v })}/>
+            <Text label="Ocupação" value={data.ocupacao} onChange={(v) => onChange({ ocupacao: v })} />
 
             <Text
                 label="Diagnóstico médico atual"
@@ -483,8 +508,8 @@ function Step1_Anamnese({ data = {}, onChange }) {
                 ]}
             />
 
-            <Area label="Histórico da doença atual (HDA)" value={data.hda} onChange={(v) => onChange({ hda: v })}/>
-            <Area label="História Progresso (HP)" value={data.hp} onChange={(v) => onChange({ hp: v })}/>
+            <Area label="Histórico da doença atual (HDA)" value={data.hda} onChange={(v) => onChange({ hda: v })} />
+            <Area label="História Progresso (HP)" value={data.hp} onChange={(v) => onChange({ hp: v })} />
             <Area
                 label="Medicamentos usuais"
                 rows={3}
@@ -499,8 +524,12 @@ function Step1_Anamnese({ data = {}, onChange }) {
                     onChange={(v) => onChange({ internacaoAnterior: v })}
                     options={[opt("sim", "Sim"), opt("nao", "Não")]}
                 />
-                <Text label="Onde/Quando" value={data.internacaoOndeQuando} onChange={(v) => onChange({ internacaoOndeQuando: v })}/>
-                <Text label="Motivo(s)" value={data.internacaoMotivos} onChange={(v) => onChange({ internacaoMotivos: v })}/>
+                <Text
+                    label="Onde/Quando"
+                    value={data.internacaoOndeQuando}
+                    onChange={(v) => onChange({ internacaoOndeQuando: v })}
+                />
+                <Text label="Motivo(s)" value={data.internacaoMotivos} onChange={(v) => onChange({ internacaoMotivos: v })} />
             </div>
 
             <div>
@@ -541,8 +570,8 @@ function Step2_PsicoSociais({ data = {}, onChange }) {
                             opt(">3x_semana", "Mais que três vezes por semana"),
                         ]}
                     />
-                    <Text label="Tipo" value={data.etilismoTipo} onChange={(v) => onChange({ etilismoTipo: v })}/>
-                    <Text label="Quantidade" value={data.etilismoQuantidade} onChange={(v) => onChange({ etilismoQuantidade: v })}/>
+                    <Text label="Tipo" value={data.etilismoTipo} onChange={(v) => onChange({ etilismoTipo: v })} />
+                    <Text label="Quantidade" value={data.etilismoQuantidade} onChange={(v) => onChange({ etilismoQuantidade: v })} />
                 </div>
             </div>
 
@@ -553,8 +582,8 @@ function Step2_PsicoSociais({ data = {}, onChange }) {
                     onChange={(v) => onChange({ tabagista: v })}
                     options={[opt("sim", "Sim"), opt("nao", "Não"), opt("ex", "Ex-tabagista")]}
                 />
-                <Text label="Cigarros/dia" type="number" value={data.cigarrosDia} onChange={(v) => onChange({ cigarrosDia: v })}/>
-                <Text label="Ex-tabagista há quanto tempo" value={data.exTabagistaTempo} onChange={(v) => onChange({ exTabagistaTempo: v })}/>
+                <Text label="Cigarros/dia" type="number" value={data.cigarrosDia} onChange={(v) => onChange({ cigarrosDia: v })} />
+                <Text label="Ex-tabagista há quanto tempo" value={data.exTabagistaTempo} onChange={(v) => onChange({ exTabagistaTempo: v })} />
             </div>
         </div>
     );
@@ -567,9 +596,22 @@ function Step3_PsicoBiologicas({ data = {}, onChange }) {
             <div>
                 <h3 className="mb-3 text-sm font-semibold text-gray-900">Cuidado corporal</h3>
                 <div className="grid gap-6 sm:grid-cols-3">
-                    <Text label="Higiene corporal (freq./dia)" value={data.higieneCorporal} onChange={(v) => onChange({ higieneCorporal: v })}/>
-                    <Text label="Higiene bucal (freq./dia)" value={data.higieneBucal} onChange={(v) => onChange({ higieneBucal: v })}/>
-                    <RSelect label="Uso de prótese" value={data.protese} onChange={(v) => onChange({ protese: v })} options={[opt("sim", "Sim"), opt("nao", "Não")]}/>
+                    <Text
+                        label="Higiene corporal (freq./dia)"
+                        value={data.higieneCorporal}
+                        onChange={(v) => onChange({ higieneCorporal: v })}
+                    />
+                    <Text
+                        label="Higiene bucal (freq./dia)"
+                        value={data.higieneBucal}
+                        onChange={(v) => onChange({ higieneBucal: v })}
+                    />
+                    <RSelect
+                        label="Uso de prótese"
+                        value={data.protese}
+                        onChange={(v) => onChange({ protese: v })}
+                        options={[opt("sim", "Sim"), opt("nao", "Não")]}
+                    />
                 </div>
 
                 <div className="mt-4">
@@ -589,22 +631,44 @@ function Step3_PsicoBiologicas({ data = {}, onChange }) {
                         label="Alimentação principal"
                         value={data.alimentacaoTipo}
                         onChange={(v) => onChange({ alimentacaoTipo: v })}
-                        options={[opt("frutas", "Rica em frutas"), opt("gordura", "Rica em gordura"), opt("carboidratos", "Rica em carboidratos")]}
+                        options={[
+                            opt("frutas", "Rica em frutas"),
+                            opt("gordura", "Rica em gordura"),
+                            opt("carboidratos", "Rica em carboidratos"),
+                        ]}
                     />
                     <RSelect
                         label="Composição"
                         value={data.alimentacaoComposicao}
                         onChange={(v) => onChange({ alimentacaoComposicao: v })}
-                        options={[opt("fibras", "Rica em fibras"), opt("proteina", "Rica em proteína"), opt("legumes_verduras", "Rica em legumes e verduras")]}
+                        options={[
+                            opt("fibras", "Rica em fibras"),
+                            opt("proteina", "Rica em proteína"),
+                            opt("legumes_verduras", "Rica em legumes e verduras"),
+                        ]}
                     />
-                    <Text label="Hidratação (água/suco) - quantidade/dia" value={data.hidratacaoQuantidade} onChange={(v) => onChange({ hidratacaoQuantidade: v })}/>
+                    <Text
+                        label="Hidratação (água/suco) - quantidade/dia"
+                        value={data.hidratacaoQuantidade}
+                        onChange={(v) => onChange({ hidratacaoQuantidade: v })}
+                    />
                 </div>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-3">
-                <RSelect label="Atividade física" value={data.atividadeFisica} onChange={(v) => onChange({ atividadeFisica: v })} options={[opt("sim", "Sim"), opt("nao", "Não")]}/>
-                <RSelect label="Recreação (frequência)" value={data.recreacaoFreq} onChange={(v) => onChange({ recreacaoFreq: v })} options={[opt("3x_semana", "Três vezes/semana"), opt(">3x_semana", "Mais de três vezes/semana")]}/>
-                <Text label="Duração" value={data.recreacaoDuracao} onChange={(v) => onChange({ recreacaoDuracao: v })}/>
+                <RSelect
+                    label="Atividade física"
+                    value={data.atividadeFisica}
+                    onChange={(v) => onChange({ atividadeFisica: v })}
+                    options={[opt("sim", "Sim"), opt("nao", "Não")]}
+                />
+                <RSelect
+                    label="Recreação (frequência)"
+                    value={data.recreacaoFreq}
+                    onChange={(v) => onChange({ recreacaoFreq: v })}
+                    options={[opt("3x_semana", "Três vezes/semana"), opt(">3x_semana", "Mais de três vezes/semana")]}
+                />
+                <Text label="Duração" value={data.recreacaoDuracao} onChange={(v) => onChange({ recreacaoDuracao: v })} />
             </div>
         </div>
     );
@@ -614,17 +678,37 @@ function Step3_PsicoBiologicas({ data = {}, onChange }) {
 function Step4_Moradia({ data = {}, onChange }) {
     return (
         <div className="space-y-8">
-            <RSelect label="Moradia" value={data.moradia} onChange={(v) => onChange({ moradia: v })} options={[opt("propria", "Própria"), opt("cedida", "Cedida"), opt("alugada", "Alugada")]}/>
+            <RSelect
+                label="Moradia"
+                value={data.moradia}
+                onChange={(v) => onChange({ moradia: v })}
+                options={[opt("propria", "Própria"), opt("cedida", "Cedida"), opt("alugada", "Alugada")]}
+            />
 
             <div className="grid gap-6 sm:grid-cols-3">
-                <RSelect label="Energia elétrica" value={data.energiaEletrica} onChange={(v) => onChange({ energiaEletrica: v })} options={[opt("sim", "Sim"), opt("nao", "Não")]}/>
-                <RSelect label="Água tratada" value={data.aguaTratada} onChange={(v) => onChange({ aguaTratada: v })} options={[opt("sim", "Sim"), opt("nao", "Não")]}/>
-                <RSelect label="Coleta de lixo" value={data.coletaLixo} onChange={(v) => onChange({ coletaLixo: v })} options={[opt("sim", "Sim"), opt("nao", "Não")]}/>
+                <RSelect
+                    label="Energia elétrica"
+                    value={data.energiaEletrica}
+                    onChange={(v) => onChange({ energiaEletrica: v })}
+                    options={[opt("sim", "Sim"), opt("nao", "Não")]}
+                />
+                <RSelect
+                    label="Água tratada"
+                    value={data.aguaTratada}
+                    onChange={(v) => onChange({ aguaTratada: v })}
+                    options={[opt("sim", "Sim"), opt("nao", "Não")]}
+                />
+                <RSelect
+                    label="Coleta de lixo"
+                    value={data.coletaLixo}
+                    onChange={(v) => onChange({ coletaLixo: v })}
+                    options={[opt("sim", "Sim"), opt("nao", "Não")]}
+                />
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="Quantos residem" type="number" value={data.qtdResidem} onChange={(v) => onChange({ qtdResidem: v })}/>
-                <Text label="Quantos trabalham" type="number" value={data.qtdTrabalham} onChange={(v) => onChange({ qtdTrabalham: v })}/>
+                <Text label="Quantos residem" type="number" value={data.qtdResidem} onChange={(v) => onChange({ qtdResidem: v })} />
+                <Text label="Quantos trabalham" type="number" value={data.qtdTrabalham} onChange={(v) => onChange({ qtdTrabalham: v })} />
             </div>
         </div>
     );
@@ -635,14 +719,14 @@ function Step5_Medidas({ data = {}, onChange }) {
     return (
         <div className="space-y-8">
             <div className="grid gap-6 sm:grid-cols-3">
-                <Text label="Peso (kg)" type="number" value={data.pesoKg} onChange={(v) => onChange({ pesoKg: v })}/>
-                <Text label="Altura (cm)" type="number" value={data.alturaCm} onChange={(v) => onChange({ alturaCm: v })}/>
-                <Text label="Glicemia capilar" value={data.glicemiaCapilar} onChange={(v) => onChange({ glicemiaCapilar: v })}/>
+                <Text label="Peso (kg)" type="number" value={data.pesoKg} onChange={(v) => onChange({ pesoKg: v })} />
+                <Text label="Altura (cm)" type="number" value={data.alturaCm} onChange={(v) => onChange({ alturaCm: v })} />
+                <Text label="Glicemia capilar" value={data.glicemiaCapilar} onChange={(v) => onChange({ glicemiaCapilar: v })} />
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-                <Text label="PA sistólica (mmHg)" type="number" value={data.paSistolica} onChange={(v) => onChange({ paSistolica: v })}/>
-                <Text label="PA diastólica (mmHg)" type="number" value={data.paDiastolica} onChange={(v) => onChange({ paDiastolica: v })}/>
+                <Text label="PA sistólica (mmHg)" type="number" value={data.paSistolica} onChange={(v) => onChange({ paSistolica: v })} />
+                <Text label="PA diastólica (mmHg)" type="number" value={data.paDiastolica} onChange={(v) => onChange({ paDiastolica: v })} />
             </div>
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
