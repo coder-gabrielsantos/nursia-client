@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { listDrafts, deleteDraft } from "../hooks/useRecordDraft";
 import { listRecords } from "../services/api";
 import {
-    Plus, RefreshCw, Search, TrendingUp, HeartPulse, Activity, Filter, ArrowUpDown, ChevronLeft, ChevronRight
+    Plus, RefreshCw, Search, TrendingUp, HeartPulse, Activity, Filter, ArrowUpDown, ChevronLeft, CalendarDays, ChevronRight
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -221,71 +221,94 @@ function Kpi({ icon, title, value, hint }) {
     );
 }
 
-// Substitua o componente RecordCard inteiro por este
 function RecordCard({ record }) {
     const navigate = useNavigate();
-    const {
-        _id,
-        nome,
-        dataAtendimento,
-        paSistolica,
-        paDiastolica,
-        pesoKg,
-        alturaCm,
-        glicemiaCapilar
-    } = record || {};
-
-    const pa =
-        paSistolica != null && paDiastolica != null
-            ? `${paSistolica}/${paDiastolica} mmHg`
-            : "—";
-    const peso = pesoKg != null ? `${pesoKg} kg` : "—";
-    const altura = alturaCm != null ? `${alturaCm} cm` : "—";
-    const glicemia = glicemiaCapilar || "—";
+    const { _id, nome, dataAtendimento } = record || {};
 
     return (
         <button
             type="button"
             onClick={() => navigate(`/records/${_id}`)}
-            className="group w-full text-left rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
             aria-label={`Abrir prontuário de ${nome || "paciente"}`}
+            className="
+        group relative w-full overflow-hidden rounded-2xl
+        bg-white p-5 text-left shadow-sm
+        transition-all duration-200
+        hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-200
+      "
         >
-            <div className="mb-3 flex items-start justify-between gap-3">
-                <div>
-                    <div className="text-sm text-gray-500">{dataAtendimento || "—"}</div>
-                    <h3 className="mt-0.5 text-base font-semibold text-gray-900 group-hover:text-gray-800">
+            {/* Borda/acentuação com gradiente sutil */}
+            <span
+                className="
+          pointer-events-none absolute inset-0 rounded-2xl
+          ring-1 ring-gray-200
+          before:absolute before:inset-y-0 before:left-0 before:w-[3px]
+          before:bg-gradient-to-b before:from-blue-500 before:to-indigo-500
+          before:content-['']
+        "
+            />
+
+            {/* Cabeçalho: Nome + Chip */}
+            <div className="relative mb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <h3
+                        className="
+              truncate text-[15px] font-semibold text-gray-900
+              transition-colors group-hover:text-gray-800
+            "
+                        title={nome || "Paciente"}
+                    >
                         {nome || "Paciente"}
                     </h3>
+
+                    <div className="mt-1 inline-flex items-center gap-1.5 text-xs text-gray-500">
+                        <CalendarDays size={14} className="shrink-0" />
+                        <span className="truncate">{dataAtendimento || "—"}</span>
+                    </div>
                 </div>
-                <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-          Prontuário
+            </div>
+
+            {/* Rodapé: CTA discreta */}
+            <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+        <span className="inline-flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          Pronto para ver detalhes
+        </span>
+                <span
+                    className="
+            inline-flex items-center gap-1 text-gray-600
+            transition-transform duration-200 group-hover:translate-x-0.5
+          "
+                >
+          Abrir <ChevronRight size={14} />
         </span>
             </div>
 
-            <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                <InfoRow label="PA" value={pa} />
-                <InfoRow label="Glicemia" value={glicemia} />
-                <InfoRow label="Peso" value={peso} />
-                <InfoRow label="Altura" value={altura} />
-            </dl>
-
-            <div className="mt-4 inline-flex items-center gap-2 text-xs text-gray-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Clique para abrir
-            </div>
+            {/* Brilho/realce sutil no hover */}
+            <div
+                className="
+          pointer-events-none absolute inset-0 rounded-2xl opacity-0
+          transition-opacity duration-200
+          group-hover:opacity-[0.035]
+          bg-gradient-to-br from-blue-500 to-indigo-600
+        "
+            />
         </button>
     );
 }
 
-
+// mantém o InfoRow original (aceita string ou JSX em value)
 function InfoRow({ label, value }) {
     return (
         <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
-            <div className="text-[11px] uppercase tracking-wide text-gray-500">{label}</div>
+            <div className="text-[11px] uppercase tracking-wide text-gray-500">
+                {label}
+            </div>
             <div className="truncate text-sm text-gray-900">{value}</div>
         </div>
     );
 }
+
 
 function SkeletonGrid() {
     return (
