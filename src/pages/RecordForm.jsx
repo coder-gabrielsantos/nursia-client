@@ -6,8 +6,6 @@ import SelectRS from "react-select";
 import InfoDialog from "../components/InfoDialog.jsx";
 import useRecordDraft from "../hooks/useRecordDraft";
 import {
-    ArrowLeft,
-    ArrowRight,
     CheckCircle2,
     Check,
 } from "lucide-react";
@@ -202,34 +200,30 @@ function FormSteps({ draftId }) {
             </div>
 
             {/* Footer nav */}
-            <div className="mt-5 flex flex-col items-stretch justify-between gap-3 sm:flex-row">
+            <div className="mt-5 flex w-full items-center justify-end gap-3">
                 <button
                     onClick={prev}
                     disabled={step === 1 || submitting}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                    className="cursor-pointer inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50 sm:flex-none sm:w-40"
                 >
-                    <ArrowLeft size={16}/> Voltar
+                    Voltar
                 </button>
 
                 {step < 5 ? (
                     <button
                         onClick={next}
                         disabled={submitting}
-                        className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                        className="cursor-pointer inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 sm:flex-none sm:w-40"
                     >
-                        Próximo <ArrowRight size={16}/>
+                        Próximo
                     </button>
                 ) : (
                     <button
                         onClick={finish}
                         disabled={submitting}
-                        className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+                        className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60 sm:flex-none sm:w-40"
                     >
-                        {submitting ? "Enviando..." : (
-                            <>
-                                <CheckCircle2 size={16}/> Finalizar
-                            </>
-                        )}
+                        {submitting ? "Enviando..." : (<><CheckCircle2 size={16}/> Finalizar</>)}
                     </button>
                 )}
             </div>
