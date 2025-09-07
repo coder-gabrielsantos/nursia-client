@@ -264,7 +264,7 @@ function FormEdit({ recordId }) {
 }
 
 /* ---------------------------- Layout base comum --------------------------- */
-function BaseFormLayout({ children, err, footer, idHint, loading, progress, submitErr, title, }) {
+function BaseFormLayout({ children, err, footer, idHint, loading, submitErr, title, }) {
     return (
         <div className="mx-auto max-w-6xl px-3 sm:px-6 md:px-10 pb-24 pt-3">
             {/* HEADER compacto (sem stepper) */}
@@ -319,7 +319,7 @@ function BaseFormLayout({ children, err, footer, idHint, loading, progress, subm
 }
 
 /* ------------------------------- Footer ----------------------------------- */
-function FooterSingle({ submitting, onFinish, onSave, isEdit = false, onCancel }) {
+function FooterSingle({ submitting, onFinish = false, onCancel }) {
     return (
         <div className="flex w-full items-center justify-end gap-3">
             <button
@@ -330,22 +330,6 @@ function FooterSingle({ submitting, onFinish, onSave, isEdit = false, onCancel }
                 <ArrowLeft className="h-4 w-4"/>
                 Voltar
             </button>
-
-            {isEdit && (
-                <button
-                    type="button"
-                    disabled={submitting}
-                    className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-emerald-600 bg-white px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 disabled:opacity-60"
-                    onClick={onSave}
-                >
-                    {submitting ? (
-                        <span className="h-4 w-4 animate-pulse rounded-full bg-emerald-600"/>
-                    ) : (
-                        <Check className="h-4 w-4"/>
-                    )}
-                    Salvar
-                </button>
-            )}
 
             <button
                 type="button"
