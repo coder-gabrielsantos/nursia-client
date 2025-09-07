@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useRecordDraft, { createDraft } from "../hooks/useRecordDraft.js";
 import { createRecord, getRecord, updateRecord } from "../services/api.js";
-import { ArrowLeft, ArrowRight, CheckCircle2, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import InfoDialog from "../components/InfoDialog";
 import ConfirmDialog from "../components/ConfirmDialog";
 import SelectRS from "react-select";
@@ -489,9 +489,10 @@ function FooterNav({ step, submitting, onPrev, onNext, onFinish, isEdit = false,
             <button
                 onClick={onPrev}
                 disabled={step === 1 || submitting}
-                className="cursor-pointer inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50 sm:flex-none sm:w-40"
+                className="cursor-pointer group inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-400 hover:bg-gray-50 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed sm:flex-none sm:w-40"
             >
-                <ArrowLeft size={16}/> Voltar
+                <ArrowLeft size={16} className="text-gray-500 group-hover:text-gray-700"/>
+                Voltar
             </button>
 
             {/* Botão Salvar — só no modo edição */}
@@ -499,7 +500,7 @@ function FooterNav({ step, submitting, onPrev, onNext, onFinish, isEdit = false,
                 <button
                     onClick={onSave}
                     disabled={submitting}
-                    className="cursor-pointer inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 text-sm font-medium text-indigo-700 hover:bg-indigo-100 disabled:opacity-60 sm:flex-none sm:w-40"
+                    className="cursor-pointer group inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-5 text-sm font-medium text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed sm:flex-none sm:w-40"
                     title="Salvar alterações"
                 >
                     Salvar
@@ -510,17 +511,23 @@ function FooterNav({ step, submitting, onPrev, onNext, onFinish, isEdit = false,
                 <button
                     onClick={onNext}
                     disabled={submitting}
-                    className="cursor-pointer inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 sm:flex-none sm:w-40"
+                    className="cursor-pointer group inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-6 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-blue-600 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed sm:flex-none sm:w-40"
                 >
-                    Próximo <ArrowRight size={16}/>
+                    Próximo
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
                 </button>
             ) : (
                 <button
                     onClick={onFinish}
                     disabled={submitting}
-                    className="cursor-pointer inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60 sm:flex-none sm:w-40"
+                    className="cursor-pointer group inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-500 px-6 text-sm font-semibold text-white shadow-md transition-all hover:from-emerald-700 hover:to-emerald-600 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed sm:flex-none sm:w-40"
                 >
-                    {submitting ? "Enviando..." : (<><CheckCircle2 size={16}/> Finalizar</>)}
+                    {submitting ? "Enviando..." : (
+                        <>
+                            <Check size={16} className="text-white"/>
+                            Finalizar
+                        </>
+                    )}
                 </button>
             )}
         </div>
