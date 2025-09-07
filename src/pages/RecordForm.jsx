@@ -5,13 +5,13 @@ import InfoDialog from "../components/InfoDialog";
 import ConfirmDialog from "../components/ConfirmDialog";
 import useRecordDraft, { createDraft } from "../hooks/useRecordDraft.js";
 import RecordFormFields from "../components/RecordFormFields.jsx";
-import { Check, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 
 // >>> NOVO: helpers e mapeamentos centralizados
 import {
     brToISO,
-    serverToForm,
     formToServer,
+    serverToForm,
 } from "../lib/recordForm.shared.js";
 
 /* --------------------------------- Página --------------------------------- */

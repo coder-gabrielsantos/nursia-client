@@ -3,11 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getRecord, deleteRecord } from "../services/api";
 import ConfirmDialog from "../components/ConfirmDialog";
 import {
+    Activity,
     ArrowLeft,
     HeartPulse,
-    Activity,
     Pencil,
-    Trash2,
+    Trash2
 } from "lucide-react";
 
 /* Helpers */

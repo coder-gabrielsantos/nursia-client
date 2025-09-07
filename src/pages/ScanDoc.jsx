@@ -5,13 +5,13 @@ import {
     ArrowLeft,
     ArrowRight,
     Camera,
+    Check,
     ImageIcon,
     Loader2,
     RefreshCw,
     Sparkles,
     Upload,
-    X,
-    Check,
+    X
 } from "lucide-react";
 import RecordFormFields from "../components/RecordFormFields.jsx";
 

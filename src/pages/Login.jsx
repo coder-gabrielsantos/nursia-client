@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginWithSinglePassword } from "../services/api";
 import {
-    Eye, EyeOff, ClipboardList, Sparkles, Heart, Zap, CheckCircle2,
+    CheckCircle2, ClipboardList, Eye, EyeOff, Heart, Sparkles, Zap
 } from "lucide-react";
 
 export default function Login() {
