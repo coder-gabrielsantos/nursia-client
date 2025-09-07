@@ -3,17 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { listDrafts, deleteDraft } from "../hooks/useRecordDraft";
 import { listRecords } from "../services/api";
 import {
-    Plus,
-    RefreshCw,
-    Search,
-    TrendingUp,
-    HeartPulse,
     Activity,
-    Filter,
+    ArrowRight,
+    CalendarDays,
     ChevronLeft,
     ChevronRight,
-    CalendarDays,
-    ArrowRight
+    Filter,
+    HeartPulse,
+    Plus,
+    Search,
+    Sparkles,
+    TrendingUp
 } from "lucide-react";
 import SelectRS from "react-select";
 
@@ -109,22 +109,25 @@ export default function Dashboard() {
                     <p className="mt-1 text-sm text-gray-600">Visão geral dos prontuários e sinais importantes.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={fetchData}
-                        className="inline-flex cursor-pointer h-10 items-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50"
-                        title="Atualizar"
-                    >
-                        <RefreshCw size={16}/> Atualizar
-                    </button>
-
-                    {/* Só admins veem o botão de novo prontuário */}
+                    {/* Só admins veem os botões de criação */}
                     {isAdmin && (
-                        <button
-                            onClick={() => navigate("/records/new")}
-                            className="inline-flex cursor-pointer h-10 items-center gap-2 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
-                        >
-                            <Plus size={16}/> Novo prontuário
-                        </button>
+                        <>
+                            <button
+                                onClick={() => navigate("/records/new")}
+                                className="inline-flex cursor-pointer h-10 items-center gap-2 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
+                            >
+                                <Plus size={16}/> Novo prontuário
+                            </button>
+
+                            {/* Novo: Preencher com IA (vai para o ScanDoc) */}
+                            <button
+                                onClick={() => navigate("/records/new/scan")}
+                                className="inline-flex cursor-pointer h-10 items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 text-sm font-medium text-indigo-700 shadow-sm hover:bg-indigo-100"
+                                title="Digitalizar documento e extrair dados para um novo prontuário"
+                            >
+                                <Sparkles size={16}/> Novo prontuário (IA)
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
