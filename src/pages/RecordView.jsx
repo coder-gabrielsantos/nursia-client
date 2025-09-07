@@ -5,7 +5,6 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import {
     Activity,
     ArrowLeft,
-    HeartPulse,
     Pencil,
     Trash2
 } from "lucide-react";
@@ -366,7 +365,6 @@ export default function RecordView() {
                             {/* MEDIDAS / SINAIS */}
                             <Section
                                 title="Medidas e Sinais"
-                                icon={<HeartPulse size={16} className="text-rose-600"/>}
                             >
                                 <Grid cols={3}>
                                     <Row label="Peso (kg)" value={dash(data?.pesoKg)}/>

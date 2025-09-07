@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { api, createRecord } from "../services/api.js";
 import {
     ArrowLeft,
-    ArrowRight,
     Camera,
     Check,
     ImageIcon,
@@ -230,26 +229,6 @@ export default function ScanDoc() {
                                     preencher um novo prontuário.
                                 </p>
                             </div>
-
-                            <div className="w-full md:w-80">
-                                <div className="rounded-2xl border border-gray-200 bg-white dark:bg-neutral-900 p-5 shadow-sm">
-                                    <div className="flex items-center gap-3">
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                                Dicas para melhor OCR
-                                            </p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-300">
-                                                Boa iluminação, enquadramento reto e imagem nítida.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <ul className="mt-4 space-y-2 text-xs text-gray-600 dark:text-gray-300">
-                                        <li>• Evite sombras e reflexos.</li>
-                                        <li>• Preencha o quadro com o documento.</li>
-                                        <li>• Prefira fundo uniforme.</li>
-                                    </ul>
-                                </div>
-                            </div>
                         </div>
 
                         <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -407,7 +386,7 @@ export default function ScanDoc() {
                                     }}
                                     title="Remover"
                                 >
-                                    <X className="h-4 w-4" />
+                                    <X className="cursor-pointer h-4 w-4" />
                                 </button>
                             </div>
                         ))}
@@ -438,24 +417,6 @@ export default function ScanDoc() {
                     </div>
 
                     {err && <div className="text-sm text-red-600 mt-2">Erro: {err}</div>}
-                </Section>
-            )}
-
-            {/* Próximo passo */}
-            {fullForm && (
-                <Section className="mt-6" title="Próximo passo">
-                    <p className="text-sm text-gray-600">
-                        Dados extraídos prontos para enviar ao formulário de criação.
-                    </p>
-                    <div className="mt-4 flex items-center gap-2">
-                        <Button
-                            intent="primary"
-                            onClick={applyToForm}
-                            icon={<ArrowRight className="h-4 w-4" />}
-                        >
-                            Ir para criar novo prontuário
-                        </Button>
-                    </div>
                 </Section>
             )}
 
@@ -522,13 +483,13 @@ function Section({ title, children, className = "" }) {
 function Button({ intent = "primary", icon, children, ...props }) {
     const styles = {
         primary:
-            "inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-white hover:opacity-95",
+            "cursor-pointer inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-white hover:opacity-95",
         secondary:
-            "inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-white hover:opacity-95",
+            "cursor-pointer inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-white hover:opacity-95",
         success:
-            "inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-white hover:opacity-95",
+            "cursor-pointer inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-white hover:opacity-95",
         ghost:
-            "inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 hover:bg-gray-50",
+            "cursor-pointer inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 hover:bg-gray-50",
     }[intent];
     return (
         <button type="button" className={styles} {...props}>
@@ -543,7 +504,7 @@ function ChoiceCard({ icon, title, desc, onClick, accent = "from-indigo-600 to-b
         <button
             type="button"
             onClick={onClick}
-            className="group relative overflow-hidden rounded-2xl border border-gray-200 p-[1px] text-left shadow-sm transition"
+            className="cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 p-[1px] text-left shadow-sm transition"
         >
             <div className={`pointer-events-none absolute inset-0 bg-gradient-to-r ${accent} opacity-20`} />
             <div className="relative rounded-2xl bg-white p-5 transition group-hover:bg-gray-50">

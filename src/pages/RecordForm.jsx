@@ -285,15 +285,6 @@ function BaseFormLayout({ children, err, footer, idHint, loading, progress, subm
                                 )}
                             </div>
                         </div>
-
-                        <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="hidden sm:flex items-center gap-2">
-                                <Progress value={progress} small/>
-                                <span className="text-[11px] text-gray-600">
-                                    {Math.round(progress)}%
-                                </span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -333,7 +324,7 @@ function FooterSingle({ submitting, onFinish, onSave, isEdit = false, onCancel }
         <div className="flex w-full items-center justify-end gap-3">
             <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                 onClick={onCancel}
             >
                 <ArrowLeft className="h-4 w-4"/>
@@ -344,7 +335,7 @@ function FooterSingle({ submitting, onFinish, onSave, isEdit = false, onCancel }
                 <button
                     type="button"
                     disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-lg border border-emerald-600 bg-white px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 disabled:opacity-60"
+                    className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-emerald-600 bg-white px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 disabled:opacity-60"
                     onClick={onSave}
                 >
                     {submitting ? (
@@ -359,7 +350,7 @@ function FooterSingle({ submitting, onFinish, onSave, isEdit = false, onCancel }
             <button
                 type="button"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:opacity-95 disabled:opacity-60"
+                className="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:opacity-95 disabled:opacity-60"
                 onClick={onFinish}
             >
                 {submitting ? (
