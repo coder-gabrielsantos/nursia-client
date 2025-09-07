@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createDraft, deleteDraft } from "../hooks/useRecordDraft";
+import { createDraft } from "../hooks/useRecordDraft";
 import { createRecord } from "../services/api";
-import SelectRS from "react-select";
 import InfoDialog from "../components/InfoDialog.jsx";
 import useRecordDraft from "../hooks/useRecordDraft";
+import SelectRS from "react-select";
 import {
     CheckCircle2,
     Check,
@@ -31,7 +31,7 @@ export default function RecordForm({ mode = "create" }) {
 }
 
 function FormSteps({ draftId }) {
-    const { draft, setDraft, updateData, progress } = useRecordDraft(draftId);
+    const { draft, setDraft, updateData, progress, suspendAutosave, removeDraft } = useRecordDraft(draftId);
     const navigate = useNavigate();
     const step = draft?.step || 1;
 
@@ -71,7 +71,10 @@ function FormSteps({ draftId }) {
         setSubmitErr("");
         setSubmitting(true);
         try {
-            // garante step final
+            // pausa autosave para não regravar o rascunho durante a finalização
+            suspendAutosave();
+
+            // opcional: marcar visualmente a etapa final (não será salvo no storage)
             setDraft({ step: 5 });
 
             // monta o payload a partir do rascunho
@@ -85,9 +88,6 @@ function FormSteps({ draftId }) {
 
             // envia para o backend
             await createRecord(payload);
-
-            // limpa o rascunho local
-            deleteDraft(draft.id);
 
             // feedback simples e redireciona
             setOpenSuccess(true);
@@ -230,6 +230,7 @@ function FormSteps({ draftId }) {
             <InfoDialog
                 open={openSuccess}
                 onClose={() => {
+                    removeDraft();
                     setOpenSuccess(false);
                     navigate("/dashboard");
                 }}
