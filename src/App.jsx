@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer"; // 👈 novo import
+import Footer from "./components/Footer";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import RecordForm from "./pages/RecordForm";
@@ -16,12 +16,14 @@ function ScrollToTop() {
     return null;
 }
 
+/* --- Guard --- */
 function ProtectedRoute({ children }) {
     const key = sessionStorage.getItem("nursia_access_key");
     if (!key) return <Navigate to="/login" replace/>;
     return children;
 }
 
+/* --- Layout com Navbar/Footer (oculta no /login) --- */
 function Layout({ children }) {
     const location = useLocation();
     const hideLayout = location.pathname === "/login";
@@ -53,6 +55,7 @@ export default function App() {
                             </ProtectedRoute>
                         }
                     />
+
                     <Route
                         path="/dashboard"
                         element={
@@ -61,6 +64,8 @@ export default function App() {
                             </ProtectedRoute>
                         }
                     />
+
+                    {/* Criar prontuário (wizard com drafts) */}
                     <Route
                         path="/records/new"
                         element={
@@ -77,6 +82,18 @@ export default function App() {
                             </ProtectedRoute>
                         }
                     />
+
+                    {/* Visualizar prontuário */}
+                    <Route
+                        path="/records/:id"
+                        element={
+                            <ProtectedRoute>
+                                <RecordView/>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* Editar prontuário (modo edição + drafts) */}
                     <Route
                         path="/records/:id/edit"
                         element={
@@ -86,10 +103,10 @@ export default function App() {
                         }
                     />
                     <Route
-                        path="/records/:id"
+                        path="/records/:id/edit/:draftId"
                         element={
                             <ProtectedRoute>
-                                <RecordView/>
+                                <RecordForm mode="edit"/>
                             </ProtectedRoute>
                         }
                     />

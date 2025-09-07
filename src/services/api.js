@@ -1,15 +1,16 @@
 import axios from "axios";
 
-// Use a env var e mantenha um fallback local para dev
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+// Base da API — usa Vite env var e fallback local para dev
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-export const api = axios.create({
-    baseURL: API_BASE_URL,
-});
+/**
+ * Instância principal com interceptors:
+ * - Request: injeta `x-access-password` e `x-admin-key` a partir do sessionStorage
+ * - Response: ao receber 401/403, limpa sessão e redireciona para /login
+ */
+export const api = axios.create({ baseURL: API_BASE_URL });
 
-// Interceptor: injeta as chaves em TODAS as requisições
-// - x-access-password: validação geral (checkAccess)
-// - x-admin-key: permissões administrativas (checkAdmin)
+/* --------------------------- Request interceptor --------------------------- */
 api.interceptors.request.use((config) => {
     const accessKey = sessionStorage.getItem("nursia_access_key");
     const adminKey = sessionStorage.getItem("nursia_admin_key");
@@ -18,24 +19,48 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-/** NOVO: login com uma senha + checkbox (asAdmin) */
+/* --------------------------- Response interceptor -------------------------- */
+api.interceptors.response.use(
+    (res) => res,
+    (error) => {
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) {
+            // limpa sessão
+            sessionStorage.removeItem("nursia_access_key");
+            sessionStorage.removeItem("nursia_admin_key");
+            sessionStorage.removeItem("nursia_role");
+            // evita loop caso já esteja na tela de login
+            if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+                // opcional: guardar rota atual para pós-login
+                // const r = encodeURIComponent(window.location.pathname + window.location.search);
+                // window.location.assign(`/login?next=${r}`);
+                window.location.assign("/login");
+            }
+        }
+        // propaga o erro para tratamento local (toasts, etc.)
+        return Promise.reject(error);
+    }
+);
+
+/* ---------------------------------- Auth ---------------------------------- */
+// Login com UMA senha + checkbox (asAdmin)
+// Retorna: { role:'nurse'|'admin', accessKey, adminKey? }
+// Obs: usamos axios "puro" para não injetar headers no /auth/login.
 export async function loginWithSinglePassword({ password, asAdmin }) {
     const { data } = await axios.post(`${API_BASE_URL}/auth/login`, {
         password,
         asAdmin: !!asAdmin,
     });
-    // data: { role:'nurse'|'admin', accessKey, adminKey? }
     return data;
 }
 
-/** (Opcional) Antigo "verifyAccessKey" pode ser aposentado */
+// (Opcional) verificação rápida de access key
 export async function verifyAccessKey(key) {
     try {
-        const res = await axios.get(`${API_BASE_URL}/records`, {
+        await axios.get(`${API_BASE_URL}/records`, {
             headers: { "x-access-password": key },
-            withCredentials: false,
         });
-        return { ok: true, data: res.data };
+        return { ok: true };
     } catch (err) {
         const msg =
             err?.response?.data?.error ||
@@ -44,32 +69,29 @@ export async function verifyAccessKey(key) {
     }
 }
 
-/** Lista prontuários (filtro opcional por nome via ?q=) */
+/* ----------------------------- Nursing Records ---------------------------- */
 export async function listRecords(params = {}) {
     const { q } = params;
-    const res = await api.get("/records", { params: { q } });
+    const res = await api.get("/records", { params: q ? { q } : undefined });
     return res.data;
 }
 
-/** Cria prontuário (exige admin) */
 export async function createRecord(payload) {
     const res = await api.post("/records", payload);
     return res.data;
 }
 
-/** Lê prontuário */
 export async function getRecord(id) {
     const res = await api.get(`/records/${id}`);
     return res.data;
 }
 
-/** Atualiza prontuário (exige admin) */
+// Alinhado com o backend: PATCH /records/:id
 export async function updateRecord(id, payload) {
-    const res = await api.put(`/records/${id}`, payload);
+    const res = await api.patch(`/records/${id}`, payload);
     return res.data;
 }
 
-/** Exclui prontuário (exige admin) */
 export async function deleteRecord(id) {
     const res = await api.delete(`/records/${id}`);
     return res.data;
