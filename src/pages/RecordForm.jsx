@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";ccc
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { createRecord, getRecord, updateRecord } from "../services/api.js";
 import InfoDialog from "../components/InfoDialog";
@@ -618,40 +618,61 @@ function Progress({ value, small = false }) {
 
 function Stepper({ current }) {
     const steps = ["Anamnese", "Psicossociais", "Psicobiológicas", "Moradia", "Medidas"];
+    const containerRef = useRef(null);
+    const itemRefs = useRef([]);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        const el = itemRefs.current[current - 1];
+        if (!container || !el) return;
+
+        el.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+        });
+    }, [current]);
+
     return (
-        <div className="overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
-            <ol className="flex w-full items-center justify-center px-2 py-2 gap-4" aria-label="Progresso das etapas">
+        <div
+            ref={containerRef}
+            className="overflow-x-auto no-scrollbar scroll-smooth px-4"
+            style={{ WebkitOverflowScrolling: "touch" }}
+        >
+            <ol
+                className="flex items-center gap-8 py-2 min-w-max"
+                aria-label="Progresso das etapas"
+            >
                 {steps.map((label, i) => {
                     const n = i + 1;
                     const done = n < current;
                     const active = n === current;
-                    const baseCircle = "flex h-8 w-8 items-center justify-center rounded-full border text-[13px] shrink-0";
+
                     return (
-                        <li key={label} className="flex items-center justify-center gap-2">
-                            <div
-                                data-active={active ? "true" : "false"}
-                                className={[
-                                    baseCircle,
-                                    done
-                                        ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                        : active
-                                            ? "border-blue-400 bg-blue-50 text-blue-700"
-                                            : "border-gray-200 bg-white text-gray-700",
-                                ].join(" ")}
-                                aria-current={active ? "step" : undefined}
-                            >
-                                {done ? <Check size={14}/> : n}
-                            </div>
-                            <span
-                                className={[
-                                    "whitespace-nowrap text-sm font-medium",
-                                    done ? "text-emerald-700" : active ? "text-blue-700" : "text-gray-700",
-                                ].join(" ")}
-                            >
-                                {label}
-                            </span>
+                        <li
+                            key={label}
+                            ref={(el) => (itemRefs.current[i] = el)}
+                            className="flex items-center gap-3 shrink-0"
+                        >
+                        <span
+                            className={[
+                                "whitespace-nowrap text-sm transition-colors",
+                                active
+                                    ? "text-blue-700 font-semibold underline underline-offset-4"
+                                    : done ? "text-emerald-700 font-medium" : "text-gray-700 font-medium",
+                            ].join(" ")}
+                        >
+                            {label}
+                        </span>
+
                             {n < steps.length && (
-                                <div className={["h-[2px] w-10 sm:w-16", done ? "bg-emerald-300" : "bg-gray-200"].join(" ")}/>
+                                <span
+                                    className={[
+                                        "block h-[2px] w-10 sm:w-16 rounded-full",
+                                        done ? "bg-emerald-300" : "bg-gray-200",
+                                    ].join(" ")}
+                                    aria-hidden
+                                />
                             )}
                         </li>
                     );
