@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import useRecordDraft, { createDraft } from "../hooks/useRecordDraft.js";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { createRecord, getRecord, updateRecord } from "../services/api.js";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import InfoDialog from "../components/InfoDialog";
 import ConfirmDialog from "../components/ConfirmDialog";
+import useRecordDraft, { createDraft } from "../hooks/useRecordDraft.js";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import SelectRS from "react-select";
 
 /* -------------------------- Helpers de data/format ------------------------- */
@@ -140,19 +140,20 @@ function serverToForm(rec = {}) {
 export default function RecordForm({ mode = "create" }) {
     const { draftId, id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Evita criação dupla em StrictMode
     const createdRef = useRef(false);
 
-    // CREATE: se não houver draftId, cria e navega
+    // CREATE: se não houver draftId, cria e navega (preservando state/autofill)
     useEffect(() => {
         if (createdRef.current) return;
         if (mode === "create" && !draftId) {
             createdRef.current = true;
             const newId = createDraft();
-            navigate(`/records/new/${newId}`, { replace: true });
+            navigate(`/records/new/${newId}`, { replace: true, state: location.state });
         }
-    }, [mode, draftId, navigate]);
+    }, [mode, draftId, navigate, location.state]);
 
     // EDIT: não criar rascunho — só segue
     if (mode === "create" && !draftId) return null;
@@ -167,12 +168,42 @@ export default function RecordForm({ mode = "create" }) {
 /* ----------------------------- Fluxo: CREATE ------------------------------ */
 function FormStepsCreate({ draftId }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const { draft, setDraft, updateData, progress, suspendAutosave, removeDraft } = useRecordDraft(draftId);
     const step = draft?.step || 1;
 
     const [submitting, setSubmitting] = useState(false);
     const [submitErr, setSubmitErr] = useState("");
     const [openSuccess, setOpenSuccess] = useState(false);
+
+    // === AUTOFILL (via navigate state) ===
+    const autofillApplied = useRef(false);
+    useEffect(() => {
+        if (autofillApplied.current) return;
+        if (!draft?.id) return;
+
+        const obj = location.state?.autofill;
+        if (!obj) return;
+
+        const normalized = {
+            ...obj,
+            dataAtendimento:
+                typeof obj.dataAtendimento === "string" && /^\d{2}\/\d{2}\/\d{4}$/.test(obj.dataAtendimento)
+                    ? brToISO(obj.dataAtendimento)
+                    : obj.dataAtendimento,
+        };
+
+        // aplica de uma vez no draft (evita corrida com autosave)
+        setDraft((prev) => ({
+            ...prev,
+            data: { ...(prev?.data || {}), ...normalized },
+        }));
+
+        autofillApplied.current = true;
+
+        // (opcional) limpar o state para não reaplicar em refresh/back
+        // navigate(".", { replace: true, state: {} });
+    }, [draft?.id, location.state, setDraft /*, navigate*/]);
 
     if (!draft) {
         return (
@@ -227,21 +258,31 @@ function FormStepsCreate({ draftId }) {
                 />
             }
         >
-            {step === 1 && <FormSection title="Anamnese" description="Dados iniciais para identificação e histórico clínico atual.">
-                <Step1_Anamnese data={draft.data} onChange={updateData}/>
-            </FormSection>}
-            {step === 2 && <FormSection title="Necessidades Psicossociais" description="Hábitos e fatores sociais relevantes ao cuidado.">
-                <Step2_PsicoSociais data={draft.data} onChange={updateData}/>
-            </FormSection>}
-            {step === 3 && <FormSection title="Necessidades Psicobiológicas" description="Rotinas de cuidado, sono, nutrição e atividades.">
-                <Step3_PsicoBiologicas data={draft.data} onChange={updateData}/>
-            </FormSection>}
-            {step === 4 && <FormSection title="Condições de Moradia" description="Infraestrutura, saneamento e composição familiar.">
-                <Step4_Moradia data={draft.data} onChange={updateData}/>
-            </FormSection>}
-            {step === 5 && <FormSection title="Medidas e Sinais" description="Registre medidas vitais e observações finais.">
-                <Step5_Medidas data={draft.data} onChange={updateData}/>
-            </FormSection>}
+            {step === 1 && (
+                <FormSection title="Anamnese" description="Dados iniciais para identificação e histórico clínico atual.">
+                    <Step1_Anamnese data={draft.data} onChange={updateData}/>
+                </FormSection>
+            )}
+            {step === 2 && (
+                <FormSection title="Necessidades Psicossociais" description="Hábitos e fatores sociais relevantes ao cuidado.">
+                    <Step2_PsicoSociais data={draft.data} onChange={updateData}/>
+                </FormSection>
+            )}
+            {step === 3 && (
+                <FormSection title="Necessidades Psicobiológicas" description="Rotinas de cuidado, sono, nutrição e atividades.">
+                    <Step3_PsicoBiologicas data={draft.data} onChange={updateData}/>
+                </FormSection>
+            )}
+            {step === 4 && (
+                <FormSection title="Condições de Moradia" description="Infraestrutura, saneamento e composição familiar.">
+                    <Step4_Moradia data={draft.data} onChange={updateData}/>
+                </FormSection>
+            )}
+            {step === 5 && (
+                <FormSection title="Medidas e Sinais" description="Registre medidas vitais e observações finais.">
+                    <Step5_Medidas data={draft.data} onChange={updateData}/>
+                </FormSection>
+            )}
 
             <InfoDialog
                 open={openSuccess}
@@ -361,25 +402,34 @@ function FormStepsEdit({ recordId }) {
         >
             {!data ? null : (
                 <>
-                    {step === 1 && <FormSection title="Anamnese" description="Dados iniciais para identificação e histórico clínico atual.">
-                        <Step1_Anamnese data={data} onChange={updateData}/>
-                    </FormSection>}
-                    {step === 2 && <FormSection title="Necessidades Psicossociais" description="Hábitos e fatores sociais relevantes ao cuidado.">
-                        <Step2_PsicoSociais data={data} onChange={updateData}/>
-                    </FormSection>}
-                    {step === 3 && <FormSection title="Necessidades Psicobiológicas" description="Rotinas de cuidado, sono, nutrição e atividades.">
-                        <Step3_PsicoBiologicas data={data} onChange={updateData}/>
-                    </FormSection>}
-                    {step === 4 && <FormSection title="Condições de Moradia" description="Infraestrutura, saneamento e composição familiar.">
-                        <Step4_Moradia data={data} onChange={updateData}/>
-                    </FormSection>}
-                    {step === 5 && <FormSection title="Medidas e Sinais" description="Registre medidas vitais e observações finais.">
-                        <Step5_Medidas data={data} onChange={updateData}/>
-                    </FormSection>}
+                    {step === 1 && (
+                        <FormSection title="Anamnese" description="Dados iniciais para identificação e histórico clínico atual.">
+                            <Step1_Anamnese data={data} onChange={updateData}/>
+                        </FormSection>
+                    )}
+                    {step === 2 && (
+                        <FormSection title="Necessidades Psicossociais" description="Hábitos e fatores sociais relevantes ao cuidado.">
+                            <Step2_PsicoSociais data={data} onChange={updateData}/>
+                        </FormSection>
+                    )}
+                    {step === 3 && (
+                        <FormSection title="Necessidades Psicobiológicas" description="Rotinas de cuidado, sono, nutrição e atividades.">
+                            <Step3_PsicoBiologicas data={data} onChange={updateData}/>
+                        </FormSection>
+                    )}
+                    {step === 4 && (
+                        <FormSection title="Condições de Moradia" description="Infraestrutura, saneamento e composição familiar.">
+                            <Step4_Moradia data={data} onChange={updateData}/>
+                        </FormSection>
+                    )}
+                    {step === 5 && (
+                        <FormSection title="Medidas e Sinais" description="Registre medidas vitais e observações finais.">
+                            <Step5_Medidas data={data} onChange={updateData}/>
+                        </FormSection>
+                    )}
                 </>
             )}
 
-            {/* Finalizar (vai para a página do prontuário) */}
             <InfoDialog
                 open={openSuccess}
                 onClose={() => {
@@ -392,11 +442,11 @@ function FormStepsEdit({ recordId }) {
                 variant="success"
             />
 
-            {/* Salvar (escolha continuar editando ou ver prontuário) */}
             <ConfirmDialog
                 open={openSaved}
-                onClose={() => setOpenSaved(false)}         // Continuar editando
-                onConfirm={() => {                         // Ver prontuário
+                onClose={() => setOpenSaved(false)} // Continuar editando
+                onConfirm={() => {
+                    // Ver prontuário
                     setOpenSaved(false);
                     navigate(`/records/${recordId}`);
                 }}
@@ -626,7 +676,7 @@ function Text({ label, value, onChange, ...props }) {
             <FieldLabel>{label}</FieldLabel>
             <input
                 className="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                value={value || ""}
+                value={value ?? ""}
                 onChange={(e) => onChange(e.target.value)}
                 {...props}
             />
@@ -641,7 +691,7 @@ function Area({ label, value, onChange, rows = 4 }) {
             <textarea
                 className="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 rows={rows}
-                value={value || ""}
+                value={value ?? ""}
                 onChange={(e) => onChange(e.target.value)}
             />
         </label>
@@ -700,7 +750,12 @@ function Step1_Anamnese({ data = {}, onChange }) {
         <div className="space-y-8">
             <div className="grid gap-6 sm:grid-cols-2">
                 <Text label="Nome" value={data.nome} onChange={(v) => onChange({ nome: v })}/>
-                <Text label="Data do atendimento" type="date" value={data.dataAtendimento} onChange={(v) => onChange({ dataAtendimento: v })}/>
+                <Text
+                    label="Data do atendimento"
+                    type="date"
+                    value={data.dataAtendimento}
+                    onChange={(v) => onChange({ dataAtendimento: v })}
+                />
             </div>
 
             <div className="grid gap-6 sm:grid-cols-3">

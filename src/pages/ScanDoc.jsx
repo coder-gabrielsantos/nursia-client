@@ -347,8 +347,7 @@ export default function ScanDoc() {
     // Enviar SEMPRE para novo formulário
     const applyToForm = () => {
         if (!mergedForm) return;
-        sessionStorage.setItem("nursia_autofill", JSON.stringify(mergedForm));
-        navigate(`/records/new`, { replace: true });
+        navigate("/records/new", { replace: true, state: { autofill: mergedForm } });
     };
 
     return (
