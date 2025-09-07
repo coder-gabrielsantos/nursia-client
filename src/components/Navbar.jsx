@@ -20,7 +20,7 @@ export default function Navbar() {
                     className="flex cursor-pointer items-center gap-2"
                     title="Nursia — Dashboard"
                 >
-                    <span className="text-xl sm:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                    <span className="text-2xl sm:text-xl md:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                         Nursia
                     </span>
 
