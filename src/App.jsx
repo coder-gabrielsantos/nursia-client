@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import RecordForm from "./pages/RecordForm";
 import RecordView from "./pages/RecordView";
+import ScanDoc from "./pages/ScanDoc";
 
 /* --- ScrollToTop --- */
 function ScrollToTop() {
@@ -107,6 +108,40 @@ export default function App() {
                         element={
                             <ProtectedRoute>
                                 <RecordForm mode="edit"/>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* NOVO: Tela de captura/extração por foto (admin) */}
+                    <Route
+                        path="/records/new/scan"
+                        element={
+                            <ProtectedRoute>
+                                <ScanDoc/>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/records/:id/edit/scan"
+                        element={
+                            <ProtectedRoute>
+                                <ScanDoc/>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/records/new/:draftId/scan"
+                        element={
+                            <ProtectedRoute>
+                                <ScanDoc/>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/records/:id/edit/:draftId/scan"
+                        element={
+                            <ProtectedRoute>
+                                <ScanDoc/>
                             </ProtectedRoute>
                         }
                     />
