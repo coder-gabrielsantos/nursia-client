@@ -235,7 +235,7 @@ export default function ScanDoc() {
                             <ChoiceCard
                                 icon={<Camera className="h-6 w-6" />}
                                 title="Tirar foto"
-                                desc="Use a câmera do dispositivo (até 2 fotos)."
+                                desc="Use a câmera do dispositivo."
                                 onClick={() => {
                                     clearAll();
                                     setMode("camera");
