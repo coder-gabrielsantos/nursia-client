@@ -12,7 +12,7 @@ export default function RecordFormFields({ value = {}, onChange, showSectionTitl
                 title={showSectionTitles ? "Anamnese" : null}
                 description={
                     showSectionTitles
-                        ? "Dados iniciais para identificação e histórico clínico atual."
+                        ? "Dados iniciais para identificação e histórico clínico."
                         : null
                 }
             >
