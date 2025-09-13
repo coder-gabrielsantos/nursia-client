@@ -54,19 +54,9 @@ export async function loginWithSinglePassword({ password, asAdmin }) {
     return data;
 }
 
-// (Opcional) verificação rápida de access key
-export async function verifyAccessKey(key) {
-    try {
-        await axios.get(`${API_BASE_URL}/records`, {
-            headers: { "x-access-password": key },
-        });
-        return { ok: true };
-    } catch (err) {
-        const msg =
-            err?.response?.data?.error ||
-            (err?.response?.status === 401 ? "Chave inválida" : "Falha de conexão");
-        return { ok: false, error: msg };
-    }
+export async function setRolePassword({ target, newPassword }) {
+    const res = await api.put('/auth/password', { target, newPassword });
+    return res.data;
 }
 
 /* ----------------------------- Nursing Records ---------------------------- */
@@ -86,7 +76,6 @@ export async function getRecord(id) {
     return res.data;
 }
 
-// Alinhado com o backend: PATCH /records/:id
 export async function updateRecord(id, payload) {
     const res = await api.patch(`/records/${id}`, payload);
     return res.data;
