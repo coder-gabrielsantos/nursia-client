@@ -75,7 +75,7 @@ export default function RecordFormFields({ value = {}, onChange, showSectionTitl
                     />
 
                     <Area label="Histórico da doença atual (HDA)" value={v.hda} onChange={(x) => patch("hda", x)} readOnly={readOnly}/>
-                    <Area label="História Progresso (HP)" value={v.hp} onChange={(x) => patch("hp", x)} readOnly={readOnly}/>
+                    <Area label="História Pregressa (HP)" value={v.hp} onChange={(x) => patch("hp", x)} readOnly={readOnly}/>
                     <Area label="Medicamentos usuais" rows={3} value={v.medicamentosUsuais} onChange={(x) => patch("medicamentosUsuais", x)} readOnly={readOnly}/>
 
                     <div className="grid gap-6 sm:grid-cols-3">

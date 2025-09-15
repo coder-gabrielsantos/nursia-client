@@ -174,7 +174,7 @@ export default function RecordView() {
                                     value={dash(data?.hda)}
                                     long
                                 />
-                                <Row label="História/Progresso (HP)" value={dash(data?.hp)} long/>
+                                <Row label="História Pregressa (HP)" value={dash(data?.hp)} long/>
                                 <Row
                                     label="Medicamentos usuais"
                                     value={dash(data?.medicamentosUsuais)}
