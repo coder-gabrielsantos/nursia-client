@@ -44,10 +44,10 @@ export default function ScanDoc() {
     const [saving, setSaving] = useState(false);
     const [saveErr, setSaveErr] = useState("");
 
-    // Apenas admin
+    // Admin e enfermeiro CAPS podem criar prontuarios
     useEffect(() => {
-        if (role !== "admin") {
-            alert("Acesso restrito a administradores.");
+        if (role !== "admin" && role !== "enfermeiro-caps") {
+            alert("Acesso restrito a administradores e enfermeiros CAPS.");
             navigate(-1);
         }
     }, [role, navigate]);

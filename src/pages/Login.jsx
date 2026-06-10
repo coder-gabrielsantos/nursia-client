@@ -1,16 +1,62 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginWithSinglePassword } from "../services/api";
+import SelectRS from "react-select";
 import {
     CheckCircle2, ClipboardList, Eye, EyeOff, Heart, Sparkles, Zap
 } from "lucide-react";
+
+const roleOptions = [
+    { value: "enfermeiro-unidade", label: "Enfermeiro unidade" },
+    { value: "enfermeiro-caps", label: "Enfermeiro CAPS" },
+    { value: "admin", label: "Administrador" },
+];
+
+const rsStyles = {
+    control: (base, state) => ({
+        ...base,
+        minHeight: 46,
+        borderRadius: 16,
+        borderColor: state.isFocused ? "#3b82f6" : "#D1D5DB",
+        boxShadow: state.isFocused ? "0 0 0 2px rgba(59,130,246,0.15)" : "none",
+        "&:hover": { borderColor: state.isFocused ? "#3b82f6" : "#D1D5DB" },
+    }),
+    valueContainer: (base) => ({
+        ...base,
+        paddingLeft: 16,
+        paddingRight: 8,
+    }),
+    singleValue: (base) => ({
+        ...base,
+        color: "#111827",
+        fontSize: 14,
+    }),
+    menu: (base) => ({
+        ...base,
+        zIndex: 40,
+        borderRadius: 16,
+        overflow: "hidden",
+        marginTop: 4,
+    }),
+    menuList: (base) => ({
+        ...base,
+        padding: 0,
+    }),
+    option: (base, state) => ({
+        ...base,
+        fontSize: 14,
+        backgroundColor: state.isSelected ? "rgba(59,130,246,0.12)" : state.isFocused ? "rgba(59,130,246,0.08)" : "white",
+        color: "#111827",
+        cursor: "pointer",
+    }),
+};
 
 export default function Login() {
     const navigate = useNavigate();
 
     const [password, setPassword] = useState("");
     const [show, setShow] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [role, setRole] = useState("enfermeiro-unidade");
 
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
@@ -25,17 +71,20 @@ export default function Login() {
         setErr("");
         setLoading(true);
         try {
-            const { role, accessKey, adminKey } = await loginWithSinglePassword({
+            const { role: loggedRole, accessKey, adminKey, roleKey } = await loginWithSinglePassword({
                 password: password.trim(),
-                asAdmin: isAdmin,
+                asAdmin: role === "admin",
+                role,
             });
 
             // Guarda as chaves conforme o backend
             sessionStorage.setItem("nursia_access_key", accessKey);
             if (adminKey) sessionStorage.setItem("nursia_admin_key", adminKey);
             else sessionStorage.removeItem("nursia_admin_key");
+            if (roleKey) sessionStorage.setItem("nursia_role_key", roleKey);
+            else sessionStorage.removeItem("nursia_role_key");
             // opcional: role para exibir coisas no UI
-            if (role) sessionStorage.setItem("nursia_role", role);
+            if (loggedRole) sessionStorage.setItem("nursia_role", loggedRole);
 
             navigate("/dashboard");
         } catch (e) {
@@ -117,14 +166,18 @@ export default function Login() {
                                 </label>
 
                                 {/* Toggle É admin? (só define a intenção) */}
-                                <label className="flex items-center gap-2 text-sm text-gray-800 select-none">
-                                    <input
-                                        type="checkbox"
-                                        className="cursor-pointer h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-200"
-                                        checked={isAdmin}
-                                        onChange={(e) => setIsAdmin(e.target.checked)}
+                                <label className="block">
+                                    <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
+                                        Perfil
+                                    </span>
+                                    <SelectRS
+                                        value={roleOptions.find((option) => option.value === role)}
+                                        onChange={(option) => setRole(option?.value || "enfermeiro-unidade")}
+                                        options={roleOptions}
+                                        placeholder="Selecione"
+                                        isSearchable={false}
+                                        styles={rsStyles}
                                     />
-                                    Sou administrador
                                 </label>
 
                                 {err && (

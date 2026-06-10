@@ -19,6 +19,9 @@ export default function RecordForm({ mode = "create" }) {
     const { draftId, id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const role = sessionStorage.getItem("nursia_role");
+    const isAdmin = role === "admin" && !!sessionStorage.getItem("nursia_admin_key");
+    const canCreateRecords = isAdmin || role === "enfermeiro-caps";
 
     // Evita criação dupla em StrictMode
     const createdRef = useRef(false);
@@ -26,14 +29,24 @@ export default function RecordForm({ mode = "create" }) {
     // CREATE: se não houver draftId, cria e navega (preservando state/autofill)
     useEffect(() => {
         if (createdRef.current) return;
+        if (mode === "create" && !canCreateRecords) {
+            navigate("/dashboard", { replace: true });
+            return;
+        }
+        if (mode === "edit" && !isAdmin) {
+            navigate("/dashboard", { replace: true });
+            return;
+        }
         if (mode === "create" && !draftId) {
             createdRef.current = true;
             const newId = createDraft();
             navigate(`/records/new/${newId}`, { replace: true, state: location.state });
         }
-    }, [mode, draftId, navigate, location.state]);
+    }, [mode, draftId, navigate, location.state, canCreateRecords, isAdmin]);
 
     // EDIT: não criar rascunho — só segue
+    if (mode === "create" && !canCreateRecords) return null;
+    if (mode === "edit" && !isAdmin) return null;
     if (mode === "create" && !draftId) return null;
 
     return mode === "edit" ? (

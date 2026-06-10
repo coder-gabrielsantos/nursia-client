@@ -18,11 +18,13 @@ export default function Dashboard() {
     const [sortBy, setSortBy] = useState("recent") // recent | oldest | name
 
     // flag local para saber se é admin (existe admin key no sessionStorage)
-    const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem("nursia_admin_key"))
+    const [role, setRole] = useState(() => sessionStorage.getItem("nursia_role"))
+    const isAdmin = role === "admin" && !!sessionStorage.getItem("nursia_admin_key")
+    const canCreateRecords = isAdmin || role === "enfermeiro-caps"
 
     // mantém flag em sincronia caso a key seja atualizada em outra aba
     useEffect(() => {
-        const check = () => setIsAdmin(!!sessionStorage.getItem("nursia_admin_key"))
+        const check = () => setRole(sessionStorage.getItem("nursia_role"))
         window.addEventListener("storage", check)
         window.addEventListener("focus", check)
         return () => {
@@ -93,24 +95,27 @@ export default function Dashboard() {
     /* ---------- Logout + Alteração de senhas ---------- */
     const [showPwdModal, setShowPwdModal] = useState(false)
     const [newAdminPwd, setNewAdminPwd] = useState("")
-    const [newNursePwd, setNewNursePwd] = useState("")
+    const [newCapsPwd, setNewCapsPwd] = useState("")
+    const [newUnitPwd, setNewUnitPwd] = useState("")
     const [pwdBusy, setPwdBusy] = useState(false)
     const [pwdMsg, setPwdMsg] = useState("")
 
     async function handleSavePasswords() {
         setPwdMsg('')
-        if (!newAdminPwd && !newNursePwd) {
+        if (!newAdminPwd && !newCapsPwd && !newUnitPwd) {
             setPwdMsg('Informe ao menos uma senha para alterar.')
             return
         }
         try {
             setPwdBusy(true)
             if (newAdminPwd) await setRolePassword({ target: 'admin', newPassword: newAdminPwd })
-            if (newNursePwd) await setRolePassword({ target: 'nurse', newPassword: newNursePwd })
+            if (newCapsPwd) await setRolePassword({ target: 'enfermeiro-caps', newPassword: newCapsPwd })
+            if (newUnitPwd) await setRolePassword({ target: 'enfermeiro-unidade', newPassword: newUnitPwd })
 
             setPwdMsg('Senha(s) atualizada(s) no banco com sucesso.')
             setNewAdminPwd('')
-            setNewNursePwd('')
+            setNewCapsPwd('')
+            setNewUnitPwd('')
         } catch (e) {
             const msg = e?.response?.data?.error || 'Não foi possível alterar as senhas.'
             setPwdMsg(msg)
@@ -132,7 +137,7 @@ export default function Dashboard() {
 
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-3">
                     {/* Só admins veem os botões de criação */}
-                    {isAdmin && (
+                    {canCreateRecords && (
                         <>
                             <button
                                 onClick={() => navigate('/records/new')}
@@ -150,13 +155,15 @@ export default function Dashboard() {
                             </button>
 
                             {/* Botão Alterar senhas (somente admin) */}
-                            <button
-                                onClick={() => setShowPwdModal(true)}
-                                className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 hover:bg-gray-50 sm:w-auto whitespace-nowrap"
-                                title="Alterar senhas de administrador e de enfermeiros"
-                            >
-                                <Key size={16} /> Alterar senhas
-                            </button>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => setShowPwdModal(true)}
+                                    className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 hover:bg-gray-50 sm:w-auto whitespace-nowrap"
+                                    title="Alterar senhas de administrador e de enfermeiros"
+                                >
+                                    <Key size={16} /> Alterar senhas
+                                </button>
+                            )}
                         </>
                     )}
                 </div>
@@ -234,7 +241,7 @@ export default function Dashboard() {
             </div>
 
             {/* Rascunhos: só admins conseguem criar/retomar formulários */}
-            {isAdmin && <Rascunhos />}
+            {canCreateRecords && <Rascunhos />}
 
             {/* Separador */}
             <div className="my-8 border-t border-gray-200" />
@@ -320,14 +327,27 @@ export default function Dashboard() {
 
                             <label className="block">
                                 <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
-                                    Enfermeiros
+                                    Enfermeiro CAPS
                                 </span>
                                 <input
                                     type="password"
-                                    value={newNursePwd}
-                                    onChange={(e) => setNewNursePwd(e.target.value)}
+                                    value={newCapsPwd}
+                                    onChange={(e) => setNewCapsPwd(e.target.value)}
                                     className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                     placeholder="••••••••"
+                                />
+                            </label>
+
+                            <label className="block">
+                                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
+                                    Enfermeiro unidade
+                                </span>
+                                <input
+                                    type="password"
+                                    value={newUnitPwd}
+                                    onChange={(e) => setNewUnitPwd(e.target.value)}
+                                    className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                                 />
                             </label>
 

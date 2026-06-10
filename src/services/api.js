@@ -14,8 +14,10 @@ export const api = axios.create({ baseURL: API_BASE_URL });
 api.interceptors.request.use((config) => {
     const accessKey = sessionStorage.getItem("nursia_access_key");
     const adminKey = sessionStorage.getItem("nursia_admin_key");
+    const roleKey = sessionStorage.getItem("nursia_role_key");
     if (accessKey) config.headers["x-access-password"] = accessKey;
     if (adminKey) config.headers["x-admin-key"] = adminKey;
+    if (roleKey) config.headers["x-role-key"] = roleKey;
     return config;
 });
 
@@ -28,6 +30,7 @@ api.interceptors.response.use(
             // limpa sessão
             sessionStorage.removeItem("nursia_access_key");
             sessionStorage.removeItem("nursia_admin_key");
+            sessionStorage.removeItem("nursia_role_key");
             sessionStorage.removeItem("nursia_role");
             // evita loop caso já esteja na tela de login
             if (typeof window !== "undefined" && window.location.pathname !== "/login") {
@@ -43,13 +46,14 @@ api.interceptors.response.use(
 );
 
 /* ---------------------------------- Auth ---------------------------------- */
-// Login com UMA senha + checkbox (asAdmin)
-// Retorna: { role:'nurse'|'admin', accessKey, adminKey? }
+// Login com UMA senha + perfil
+// Retorna: { role:'admin'|'enfermeiro-caps'|'enfermeiro-unidade', accessKey, adminKey?, roleKey? }
 // Obs: usamos axios "puro" para não injetar headers no /auth/login.
-export async function loginWithSinglePassword({ password, asAdmin }) {
+export async function loginWithSinglePassword({ password, asAdmin, role }) {
     const { data } = await axios.post(`${API_BASE_URL}/auth/login`, {
         password,
         asAdmin: !!asAdmin,
+        role,
     });
     return data;
 }
