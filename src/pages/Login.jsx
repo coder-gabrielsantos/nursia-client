@@ -7,9 +7,8 @@ import {
 } from "lucide-react";
 
 const roleOptions = [
-    { value: "enfermeiro-unidade", label: "Enfermeiro unidade" },
     { value: "enfermeiro-caps", label: "Enfermeiro CAPS" },
-    { value: "admin", label: "Administrador" },
+    { value: "enfermeiro-unidade", label: "Enfermeiro UBS" },
 ];
 
 const rsStyles = {
@@ -71,16 +70,13 @@ export default function Login() {
         setErr("");
         setLoading(true);
         try {
-            const { role: loggedRole, accessKey, adminKey, roleKey } = await loginWithSinglePassword({
+            const { role: loggedRole, accessKey, roleKey } = await loginWithSinglePassword({
                 password: password.trim(),
-                asAdmin: role === "admin",
                 role,
             });
 
             // Guarda as chaves conforme o backend
             sessionStorage.setItem("nursia_access_key", accessKey);
-            if (adminKey) sessionStorage.setItem("nursia_admin_key", adminKey);
-            else sessionStorage.removeItem("nursia_admin_key");
             if (roleKey) sessionStorage.setItem("nursia_role_key", roleKey);
             else sessionStorage.removeItem("nursia_role_key");
             // opcional: role para exibir coisas no UI
@@ -165,7 +161,6 @@ export default function Login() {
                                     </div>
                                 </label>
 
-                                {/* Toggle É admin? (só define a intenção) */}
                                 <label className="block">
                                     <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
                                         Perfil

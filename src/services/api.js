@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 /**
  * Instância principal com interceptors:
- * - Request: injeta `x-access-password` e `x-admin-key` a partir do sessionStorage
+ * - Request: injeta as credenciais de acesso a partir do sessionStorage
  * - Response: ao receber 401/403, limpa sessão e redireciona para /login
  */
 export const api = axios.create({ baseURL: API_BASE_URL });
@@ -13,10 +13,8 @@ export const api = axios.create({ baseURL: API_BASE_URL });
 /* --------------------------- Request interceptor --------------------------- */
 api.interceptors.request.use((config) => {
     const accessKey = sessionStorage.getItem("nursia_access_key");
-    const adminKey = sessionStorage.getItem("nursia_admin_key");
     const roleKey = sessionStorage.getItem("nursia_role_key");
     if (accessKey) config.headers["x-access-password"] = accessKey;
-    if (adminKey) config.headers["x-admin-key"] = adminKey;
     if (roleKey) config.headers["x-role-key"] = roleKey;
     return config;
 });
@@ -29,7 +27,6 @@ api.interceptors.response.use(
         if (status === 401 || status === 403) {
             // limpa sessão
             sessionStorage.removeItem("nursia_access_key");
-            sessionStorage.removeItem("nursia_admin_key");
             sessionStorage.removeItem("nursia_role_key");
             sessionStorage.removeItem("nursia_role");
             // evita loop caso já esteja na tela de login
@@ -47,20 +44,14 @@ api.interceptors.response.use(
 
 /* ---------------------------------- Auth ---------------------------------- */
 // Login com UMA senha + perfil
-// Retorna: { role:'admin'|'enfermeiro-caps'|'enfermeiro-unidade', accessKey, adminKey?, roleKey? }
+// Retorna: { role:'enfermeiro-caps'|'enfermeiro-unidade', accessKey, roleKey }
 // Obs: usamos axios "puro" para não injetar headers no /auth/login.
-export async function loginWithSinglePassword({ password, asAdmin, role }) {
+export async function loginWithSinglePassword({ password, role }) {
     const { data } = await axios.post(`${API_BASE_URL}/auth/login`, {
         password,
-        asAdmin: !!asAdmin,
         role,
     });
     return data;
-}
-
-export async function setRolePassword({ target, newPassword }) {
-    const res = await api.put('/auth/password', { target, newPassword });
-    return res.data;
 }
 
 /* ----------------------------- Nursing Records ---------------------------- */

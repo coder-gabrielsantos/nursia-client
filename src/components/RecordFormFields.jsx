@@ -7,9 +7,9 @@ export default function RecordFormFields({ value = {}, onChange, showSectionTitl
 
     return (
         <div className="space-y-10">
-            {/* 1) Anamnese */}
+            {/* Etapa 1 — Avaliação */}
             <FormSection
-                title={showSectionTitles ? "Anamnese" : null}
+                title={showSectionTitles ? "1. Avaliação" : null}
                 description={
                     showSectionTitles
                         ? "Dados iniciais para identificação e histórico clínico."
@@ -296,6 +296,58 @@ export default function RecordFormFields({ value = {}, onChange, showSectionTitl
                         <Text label="PA Diastólica" type="number" value={v.paDiastolica} onChange={(x) => patch("paDiastolica", x)} readOnly={readOnly}/>
                     </div>
                 </div>
+            </FormSection>
+
+            <FormSection
+                title={showSectionTitles ? "2. Diagnóstico de enfermagem" : null}
+                description={showSectionTitles ? "Registre os diagnósticos de enfermagem identificados na avaliação." : null}
+            >
+                <Area
+                    label="Diagnóstico de enfermagem"
+                    value={v.diagnosticoEnfermagem}
+                    onChange={(x) => patch("diagnosticoEnfermagem", x)}
+                    rows={5}
+                    readOnly={readOnly}
+                />
+            </FormSection>
+
+            <FormSection
+                title={showSectionTitles ? "3. Planejamento" : null}
+                description={showSectionTitles ? "Defina resultados esperados, prioridades e intervenções." : null}
+            >
+                <Area
+                    label="Planejamento"
+                    value={v.planejamento}
+                    onChange={(x) => patch("planejamento", x)}
+                    rows={5}
+                    readOnly={readOnly}
+                />
+            </FormSection>
+
+            <FormSection
+                title={showSectionTitles ? "4. Implementação" : null}
+                description={showSectionTitles ? "Descreva os cuidados e intervenções realizados." : null}
+            >
+                <Area
+                    label="Implementação"
+                    value={v.implementacao}
+                    onChange={(x) => patch("implementacao", x)}
+                    rows={5}
+                    readOnly={readOnly}
+                />
+            </FormSection>
+
+            <FormSection
+                title={showSectionTitles ? "5. Evolução" : null}
+                description={showSectionTitles ? "Registre a resposta do paciente e a evolução do cuidado." : null}
+            >
+                <Area
+                    label="Evolução"
+                    value={v.evolucao}
+                    onChange={(x) => patch("evolucao", x)}
+                    rows={5}
+                    readOnly={readOnly}
+                />
             </FormSection>
         </div>
     );

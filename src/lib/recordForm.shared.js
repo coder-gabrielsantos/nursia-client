@@ -218,6 +218,12 @@ export function serverToForm(rec = {}) {
         glicemiaCapilar: rec.glicemiaCapilar || "",
         paSistolica: rec.paSistolica ?? "",
         paDiastolica: rec.paDiastolica ?? "",
+
+        // Demais etapas do processo de enfermagem
+        diagnosticoEnfermagem: rec.diagnosticoEnfermagem || "",
+        planejamento: rec.planejamento || "",
+        implementacao: rec.implementacao || "",
+        evolucao: rec.evolucao || "",
     };
 }
 
@@ -372,6 +378,10 @@ export function formToServer(form = {}) {
             form.paDiastolica !== "" && form.paDiastolica !== undefined
                 ? Number(form.paDiastolica)
                 : null,
+        diagnosticoEnfermagem: form.diagnosticoEnfermagem || "",
+        planejamento: form.planejamento || "",
+        implementacao: form.implementacao || "",
+        evolucao: form.evolucao || "",
     };
 }
 
@@ -494,5 +504,9 @@ export function schemaToForm(rec = {}) {
         glicemiaCapilar: rec.glicemiaCapilar || "",
         paSistolica: rec.paSistolica ?? "",
         paDiastolica: rec.paDiastolica ?? "",
+        diagnosticoEnfermagem: rec.diagnosticoEnfermagem || "",
+        planejamento: rec.planejamento || "",
+        implementacao: rec.implementacao || "",
+        evolucao: rec.evolucao || "",
     };
 }

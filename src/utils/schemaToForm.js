@@ -99,5 +99,9 @@ export function schemaToForm(rec = {}) {
         glicemiaCapilar: rec.glicemiaCapilar || "",
         paSistolica: rec.paSistolica ?? "",
         paDiastolica: rec.paDiastolica ?? "",
+        diagnosticoEnfermagem: rec.diagnosticoEnfermagem || "",
+        planejamento: rec.planejamento || "",
+        implementacao: rec.implementacao || "",
+        evolucao: rec.evolucao || "",
     };
 }

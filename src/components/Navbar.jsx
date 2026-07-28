@@ -8,7 +8,6 @@ export default function Navbar() {
 
     function handleLogout() {
         sessionStorage.removeItem("nursia_access_key");
-        sessionStorage.removeItem("nursia_admin_key"); // remove também admin se existir
         sessionStorage.removeItem("nursia_role_key");
         sessionStorage.removeItem("nursia_role");
         navigate("/login");

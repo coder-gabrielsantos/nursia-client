@@ -112,7 +112,7 @@ export default function App() {
                         }
                     />
 
-                    {/* NOVO: Tela de captura/extração por foto (admin) */}
+                    {/* Tela de captura/extração por foto (Enfermeiro CAPS) */}
                     <Route
                         path="/records/new/scan"
                         element={

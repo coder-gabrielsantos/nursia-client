@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { listDrafts, deleteDraft } from "../hooks/useRecordDraft"
-import { listRecords, setRolePassword } from '../services/api'
+import { listRecords } from '../services/api'
 import {
-    Activity, ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Filter, HeartPulse, Plus, Search, Sparkles, TrendingUp, Key
+    Activity, ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Filter, HeartPulse, Plus, Search, Sparkles, TrendingUp
 } from "lucide-react"
 import SelectRS from "react-select"
 
@@ -17,10 +17,8 @@ export default function Dashboard() {
     const [q, setQ] = useState("")
     const [sortBy, setSortBy] = useState("recent") // recent | oldest | name
 
-    // flag local para saber se é admin (existe admin key no sessionStorage)
     const [role, setRole] = useState(() => sessionStorage.getItem("nursia_role"))
-    const isAdmin = role === "admin" && !!sessionStorage.getItem("nursia_admin_key")
-    const canCreateRecords = isAdmin || role === "enfermeiro-caps"
+    const canManageRecords = role === "enfermeiro-caps"
 
     // mantém flag em sincronia caso a key seja atualizada em outra aba
     useEffect(() => {
@@ -39,7 +37,7 @@ export default function Dashboard() {
             setErr("")
             const data = await listRecords({ q: q.trim() || undefined })
             setRaw(Array.isArray(data) ? data : [])
-        } catch (e) {
+        } catch {
             setErr("Não foi possível carregar os prontuários.")
         } finally {
             setLoading(false)
@@ -92,38 +90,6 @@ export default function Dashboard() {
 
     const goRec = (p) => setRecPage(Math.min(Math.max(1, p), recTotalPages))
 
-    /* ---------- Logout + Alteração de senhas ---------- */
-    const [showPwdModal, setShowPwdModal] = useState(false)
-    const [newAdminPwd, setNewAdminPwd] = useState("")
-    const [newCapsPwd, setNewCapsPwd] = useState("")
-    const [newUnitPwd, setNewUnitPwd] = useState("")
-    const [pwdBusy, setPwdBusy] = useState(false)
-    const [pwdMsg, setPwdMsg] = useState("")
-
-    async function handleSavePasswords() {
-        setPwdMsg('')
-        if (!newAdminPwd && !newCapsPwd && !newUnitPwd) {
-            setPwdMsg('Informe ao menos uma senha para alterar.')
-            return
-        }
-        try {
-            setPwdBusy(true)
-            if (newAdminPwd) await setRolePassword({ target: 'admin', newPassword: newAdminPwd })
-            if (newCapsPwd) await setRolePassword({ target: 'enfermeiro-caps', newPassword: newCapsPwd })
-            if (newUnitPwd) await setRolePassword({ target: 'enfermeiro-unidade', newPassword: newUnitPwd })
-
-            setPwdMsg('Senha(s) atualizada(s) no banco com sucesso.')
-            setNewAdminPwd('')
-            setNewCapsPwd('')
-            setNewUnitPwd('')
-        } catch (e) {
-            const msg = e?.response?.data?.error || 'Não foi possível alterar as senhas.'
-            setPwdMsg(msg)
-        } finally {
-            setPwdBusy(false)
-        }
-    }
-
     return (
         <div className="mx-auto max-w-6xl px-6 md:px-8 lg:px-12 pb-12">
             {/* Header + CTAs */}
@@ -136,8 +102,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-3">
-                    {/* Só admins veem os botões de criação */}
-                    {canCreateRecords && (
+                    {canManageRecords && (
                         <>
                             <button
                                 onClick={() => navigate('/records/new')}
@@ -153,17 +118,6 @@ export default function Dashboard() {
                             >
                                 <Sparkles size={16} /> Novo prontuário (IA)
                             </button>
-
-                            {/* Botão Alterar senhas (somente admin) */}
-                            {isAdmin && (
-                                <button
-                                    onClick={() => setShowPwdModal(true)}
-                                    className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 hover:bg-gray-50 sm:w-auto whitespace-nowrap"
-                                    title="Alterar senhas de administrador e de enfermeiros"
-                                >
-                                    <Key size={16} /> Alterar senhas
-                                </button>
-                            )}
                         </>
                     )}
                 </div>
@@ -240,8 +194,8 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* Rascunhos: só admins conseguem criar/retomar formulários */}
-            {canCreateRecords && <Rascunhos />}
+            {/* Somente o CAPS cria e retoma formulários. */}
+            {canManageRecords && <Rascunhos />}
 
             {/* Separador */}
             <div className="my-8 border-t border-gray-200" />
@@ -297,86 +251,6 @@ export default function Dashboard() {
                 </section>
             )}
 
-            {/* Modal: Alterar senhas */}
-            {showPwdModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    {/* backdrop */}
-                    <div
-                        className="absolute inset-0 bg-black/30"
-                        onClick={() => {
-                            if (!pwdBusy) setShowPwdModal(false)
-                        }}
-                    />
-                    <div className="relative z-10 w-full max-w-md rounded-2xl border border-gray-200 bg-white p-5 shadow-xl">
-                        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 pb-4">
-                            <Key size={18} /> Alterar senhas
-                        </h3>
-                        <div className="mt-4 space-y-4">
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
-                                    Administrador
-                                </span>
-                                <input
-                                    type="password"
-                                    value={newAdminPwd}
-                                    onChange={(e) => setNewAdminPwd(e.target.value)}
-                                    className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                    placeholder="••••••••"
-                                />
-                            </label>
-
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
-                                    Enfermeiro CAPS
-                                </span>
-                                <input
-                                    type="password"
-                                    value={newCapsPwd}
-                                    onChange={(e) => setNewCapsPwd(e.target.value)}
-                                    className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                    placeholder="••••••••"
-                                />
-                            </label>
-
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
-                                    Enfermeiro unidade
-                                </span>
-                                <input
-                                    type="password"
-                                    value={newUnitPwd}
-                                    onChange={(e) => setNewUnitPwd(e.target.value)}
-                                    className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                                />
-                            </label>
-
-                            {pwdMsg && (
-                                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
-                                    {pwdMsg}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="mt-5 flex items-center justify-end gap-2">
-                            <button
-                                disabled={pwdBusy}
-                                onClick={() => setShowPwdModal(false)}
-                                className="h-10 rounded-xl border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-60"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                disabled={pwdBusy}
-                                onClick={handleSavePasswords}
-                                className="h-10 rounded-xl bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-                            >
-                                {pwdBusy ? "Salvando..." : "Salvar"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

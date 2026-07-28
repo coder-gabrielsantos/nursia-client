@@ -20,7 +20,7 @@ export default function RecordView() {
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState("");
     const title = useMemo(() => data?.nome || "Prontuário", [data?.nome]);
-    const isAdmin = !!sessionStorage.getItem("nursia_admin_key");
+    const canManageRecords = sessionStorage.getItem("nursia_role") === "enfermeiro-caps";
     const [openDel, setOpenDel] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
@@ -31,7 +31,7 @@ export default function RecordView() {
                 setLoading(true);
                 const rec = await getRecord(id);
                 if (on) setData(rec);
-            } catch (e) {
+            } catch {
                 setErr("Não foi possível carregar este prontuário.");
             } finally {
                 if (on) setLoading(false);
@@ -41,11 +41,6 @@ export default function RecordView() {
             on = false;
         };
     }, [id]);
-
-    async function handleDelete() {
-        if (!isAdmin) return;
-        setOpenDel(true);
-    }
 
     async function confirmDelete() {
         try {
@@ -63,7 +58,7 @@ export default function RecordView() {
     }
 
     function handleEdit() {
-        if (!isAdmin) return;
+        if (!canManageRecords) return;
         navigate(`/records/${id}/edit`);
     }
 
@@ -97,7 +92,7 @@ export default function RecordView() {
                             >
                                 <ArrowLeft size={16}/> Voltar
                             </button>
-                            {isAdmin && (
+                            {canManageRecords && (
                                 <>
                                     <button
                                         onClick={handleEdit}
@@ -133,8 +128,8 @@ export default function RecordView() {
                         </div>
                     ) : (
                         <>
-                            {/* ANAMNESE */}
-                            <Section title="Anamnese">
+                            {/* ETAPA 1 — AVALIAÇÃO */}
+                            <Section title="1. Avaliação">
                                 <Grid cols={2}>
                                     <Row label="Nome" value={dash(data?.nome)}/>
                                     <Row
@@ -388,12 +383,32 @@ export default function RecordView() {
                                     ).toLocaleString()}
                                 </div>
                             </Section>
+
+                            <Section title="2. Diagnóstico de enfermagem">
+                                <Row
+                                    label="Diagnóstico de enfermagem"
+                                    value={dash(data?.diagnosticoEnfermagem)}
+                                    long
+                                />
+                            </Section>
+
+                            <Section title="3. Planejamento">
+                                <Row label="Planejamento" value={dash(data?.planejamento)} long/>
+                            </Section>
+
+                            <Section title="4. Implementação">
+                                <Row label="Implementação" value={dash(data?.implementacao)} long/>
+                            </Section>
+
+                            <Section title="5. Evolução">
+                                <Row label="Evolução" value={dash(data?.evolucao)} long/>
+                            </Section>
                         </>
                     )}
                 </div>
             </div>
 
-            {isAdmin && (
+            {canManageRecords && (
                 <ConfirmDialog
                     open={openDel}
                     onClose={() => (!deleting && setOpenDel(false))}

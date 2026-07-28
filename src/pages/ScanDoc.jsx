@@ -44,10 +44,10 @@ export default function ScanDoc() {
     const [saving, setSaving] = useState(false);
     const [saveErr, setSaveErr] = useState("");
 
-    // Admin e enfermeiro CAPS podem criar prontuarios
+    // Somente o enfermeiro CAPS pode alimentar os prontuários.
     useEffect(() => {
-        if (role !== "admin" && role !== "enfermeiro-caps") {
-            alert("Acesso restrito a administradores e enfermeiros CAPS.");
+        if (role !== "enfermeiro-caps") {
+            alert("Acesso restrito ao Enfermeiro CAPS.");
             navigate(-1);
         }
     }, [role, navigate]);
@@ -81,7 +81,9 @@ export default function ScanDoc() {
             try {
                 streamRef.current?.getTracks()?.forEach((t) => t.stop());
                 streamRef.current = null;
-            } catch {}
+            } catch {
+                // A câmera pode já ter sido encerrada pelo navegador.
+            }
         };
     }, [mode]);
 
@@ -168,13 +170,6 @@ export default function ScanDoc() {
         } finally {
             setLoading(false);
         }
-    };
-
-    // Ir para RecordForm com autofill
-    const applyToForm = () => {
-        if (!fullForm) return;
-        sessionStorage.setItem("nursia_autofill", JSON.stringify(fullForm));
-        navigate("/records/new", { replace: true, state: { autofill: fullForm } });
     };
 
     // Salvar direto como novo prontuário (com sanitização)
