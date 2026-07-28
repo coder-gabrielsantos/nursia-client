@@ -61,7 +61,7 @@ export default function Login() {
     const [err, setErr] = useState("");
 
     useEffect(() => {
-        const existing = sessionStorage.getItem("nursia_access_key");
+        const existing = sessionStorage.getItem("nursia_role_key");
         if (existing) navigate("/dashboard");
     }, [navigate]);
 
@@ -70,13 +70,12 @@ export default function Login() {
         setErr("");
         setLoading(true);
         try {
-            const { role: loggedRole, accessKey, roleKey } = await loginWithSinglePassword({
+            const { role: loggedRole, roleKey } = await loginWithSinglePassword({
                 password: password.trim(),
                 role,
             });
 
             // Guarda as chaves conforme o backend
-            sessionStorage.setItem("nursia_access_key", accessKey);
             if (roleKey) sessionStorage.setItem("nursia_role_key", roleKey);
             else sessionStorage.removeItem("nursia_role_key");
             // opcional: role para exibir coisas no UI

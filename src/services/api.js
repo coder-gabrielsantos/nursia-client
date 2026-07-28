@@ -12,9 +12,7 @@ export const api = axios.create({ baseURL: API_BASE_URL });
 
 /* --------------------------- Request interceptor --------------------------- */
 api.interceptors.request.use((config) => {
-    const accessKey = sessionStorage.getItem("nursia_access_key");
     const roleKey = sessionStorage.getItem("nursia_role_key");
-    if (accessKey) config.headers["x-access-password"] = accessKey;
     if (roleKey) config.headers["x-role-key"] = roleKey;
     return config;
 });
@@ -26,7 +24,6 @@ api.interceptors.response.use(
         const status = error?.response?.status;
         if (status === 401 || status === 403) {
             // limpa sessão
-            sessionStorage.removeItem("nursia_access_key");
             sessionStorage.removeItem("nursia_role_key");
             sessionStorage.removeItem("nursia_role");
             // evita loop caso já esteja na tela de login
@@ -44,7 +41,7 @@ api.interceptors.response.use(
 
 /* ---------------------------------- Auth ---------------------------------- */
 // Login com UMA senha + perfil
-// Retorna: { role:'enfermeiro-caps'|'enfermeiro-unidade', accessKey, roleKey }
+// Retorna: { role:'enfermeiro-caps'|'enfermeiro-unidade', roleKey }
 // Obs: usamos axios "puro" para não injetar headers no /auth/login.
 export async function loginWithSinglePassword({ password, role }) {
     const { data } = await axios.post(`${API_BASE_URL}/auth/login`, {

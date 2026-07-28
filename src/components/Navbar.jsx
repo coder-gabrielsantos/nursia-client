@@ -4,10 +4,9 @@ import { ShieldCheck, LogOut } from "lucide-react";
 
 export default function Navbar() {
     const navigate = useNavigate();
-    const isLogged = useMemo(() => !!sessionStorage.getItem("nursia_access_key"), []);
+    const isLogged = useMemo(() => !!sessionStorage.getItem("nursia_role_key"), []);
 
     function handleLogout() {
-        sessionStorage.removeItem("nursia_access_key");
         sessionStorage.removeItem("nursia_role_key");
         sessionStorage.removeItem("nursia_role");
         navigate("/login");

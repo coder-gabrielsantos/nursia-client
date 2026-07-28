@@ -19,7 +19,7 @@ function ScrollToTop() {
 
 /* --- Guard --- */
 function ProtectedRoute({ children }) {
-    const key = sessionStorage.getItem("nursia_access_key");
+    const key = sessionStorage.getItem("nursia_role_key");
     if (!key) return <Navigate to="/login" replace/>;
     return children;
 }
