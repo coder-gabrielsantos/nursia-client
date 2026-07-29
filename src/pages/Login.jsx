@@ -1,61 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginWithSinglePassword } from "../services/api";
-import SelectRS from "react-select";
 import {
     CheckCircle2, ClipboardList, Eye, EyeOff, Heart, Sparkles, Zap
 } from "lucide-react";
-
-const roleOptions = [
-    { value: "enfermeiro-caps", label: "Enfermeiro CAPS" },
-    { value: "enfermeiro-unidade", label: "Enfermeiro UBS" },
-];
-
-const rsStyles = {
-    control: (base, state) => ({
-        ...base,
-        minHeight: 46,
-        borderRadius: 16,
-        borderColor: state.isFocused ? "#3b82f6" : "#D1D5DB",
-        boxShadow: state.isFocused ? "0 0 0 2px rgba(59,130,246,0.15)" : "none",
-        "&:hover": { borderColor: state.isFocused ? "#3b82f6" : "#D1D5DB" },
-    }),
-    valueContainer: (base) => ({
-        ...base,
-        paddingLeft: 16,
-        paddingRight: 8,
-    }),
-    singleValue: (base) => ({
-        ...base,
-        color: "#111827",
-        fontSize: 14,
-    }),
-    menu: (base) => ({
-        ...base,
-        zIndex: 40,
-        borderRadius: 16,
-        overflow: "hidden",
-        marginTop: 4,
-    }),
-    menuList: (base) => ({
-        ...base,
-        padding: 0,
-    }),
-    option: (base, state) => ({
-        ...base,
-        fontSize: 14,
-        backgroundColor: state.isSelected ? "rgba(59,130,246,0.12)" : state.isFocused ? "rgba(59,130,246,0.08)" : "white",
-        color: "#111827",
-        cursor: "pointer",
-    }),
-};
 
 export default function Login() {
     const navigate = useNavigate();
 
     const [password, setPassword] = useState("");
     const [show, setShow] = useState(false);
-    const [role, setRole] = useState("enfermeiro-unidade");
 
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
@@ -72,7 +26,6 @@ export default function Login() {
         try {
             const { role: loggedRole, roleKey } = await loginWithSinglePassword({
                 password: password.trim(),
-                role,
             });
 
             // Guarda as chaves conforme o backend
@@ -158,20 +111,6 @@ export default function Login() {
                                             {show ? <EyeOff size={20} /> : <Eye size={20} />}
                                         </button>
                                     </div>
-                                </label>
-
-                                <label className="block">
-                                    <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-700">
-                                        Perfil
-                                    </span>
-                                    <SelectRS
-                                        value={roleOptions.find((option) => option.value === role)}
-                                        onChange={(option) => setRole(option?.value || "enfermeiro-unidade")}
-                                        options={roleOptions}
-                                        placeholder="Selecione"
-                                        isSearchable={false}
-                                        styles={rsStyles}
-                                    />
                                 </label>
 
                                 {err && (

@@ -40,13 +40,20 @@ api.interceptors.response.use(
 );
 
 /* ---------------------------------- Auth ---------------------------------- */
-// Login com UMA senha + perfil
+// Login com uma senha; o backend identifica o perfil correspondente.
 // Retorna: { role:'enfermeiro-caps'|'enfermeiro-unidade', roleKey }
 // Obs: usamos axios "puro" para não injetar headers no /auth/login.
-export async function loginWithSinglePassword({ password, role }) {
+export async function loginWithSinglePassword({ password }) {
     const { data } = await axios.post(`${API_BASE_URL}/auth/login`, {
         password,
-        role,
+    });
+    return data;
+}
+
+export async function changeAccessPasswords({ capsPassword, unidadePassword }) {
+    const { data } = await api.put("/auth/passwords", {
+        capsPassword,
+        unidadePassword,
     });
     return data;
 }
